@@ -1,12 +1,11 @@
 # Finite-state quantum encoding
 
-If the diabatic model contains $N_s=2^n$ states, its matrix can be expanded exactly
+If the diabatic model contains $N_s = 2^n$ states, its matrix can be expanded exactly
 in the $n$-qubit Pauli basis:
 
 $$
-H=\sum_P c_P P,
-\qquad
-c_P=\frac{1}{2^n}\operatorname{Tr}(P^\dagger H).
+H \;=\; \sum_P c_P\, P, \qquad
+c_P = \frac{1}{2^n}\operatorname{Tr}\!\big(P^\dagger H\big).
 $$
 
 This is an encoding of the **selected electronic-state manifold**. It can be useful
