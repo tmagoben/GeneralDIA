@@ -1,0 +1,22 @@
+name: optional-backends
+on:
+  workflow_dispatch:
+  pull_request:
+    paths: ["generaldia/quantum/**", "generaldia/electronic_structure/**", "pyproject.toml"]
+jobs:
+  quantum:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.11"}
+      - run: pip install -e ".[dev,quantum]"
+      - run: pytest -q -m optional
+  pyscf-import:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.11"}
+      - run: pip install -e ".[pyscf]"
+      - run: python -c "from generaldia.electronic_structure.pyscf_backend import RHFBackend,SACASSCFBackend; print('PySCF adapters import')"

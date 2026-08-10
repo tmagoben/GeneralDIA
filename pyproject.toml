@@ -1,0 +1,21 @@
+[build-system]
+requires=["setuptools>=68","wheel"]
+build-backend="setuptools.build_meta"
+
+[project]
+name="generaldia"
+version="2.0.0"
+description="Observable-constrained diabatic Hamiltonians with ab initio and quantum state-subspace backends"
+requires-python=">=3.10"
+dependencies=["numpy>=1.24","torch>=2.1"]
+
+[project.optional-dependencies]
+dev=["pytest>=7.4","scipy>=1.10"]
+pyscf=["pyscf>=2.8"]
+quantum=["scipy>=1.10","pennylane>=0.40","qiskit>=1.0"]
+all=["pytest>=7.4","scipy>=1.10","pyscf>=2.8","pennylane>=0.40","qiskit>=1.0"]
+
+[tool.pytest.ini_options]
+testpaths=["tests"]
+pythonpath=["."]
+markers=["optional: tests requiring optional third-party backends"]
