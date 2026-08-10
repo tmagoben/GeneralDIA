@@ -14,7 +14,7 @@ For Cartesian component $R_{A\alpha}$,
 
 $$
 N_{ij}^{A\alpha} =
-\left\langle \phi_i \left|\n\frac{\partial H}{\partial R_{A\alpha}}\n\right| \phi_j \right\rangle.
+\left\langle \phi_i \left|\frac{\partial H}{\partial R_{A\alpha}}\right| \phi_j \right\rangle.
 $$
 
 For nondegenerate states and a differentiable gauge,
