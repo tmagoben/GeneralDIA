@@ -1,0 +1,11 @@
+cff-version: 1.2.0
+message: "If you use GeneralDIA, cite the repository and the version used."
+title: "GeneralDIA"
+type: software
+authors:
+  - family-names: "Cohen-Magobenny"
+    given-names: "Timbila"
+repository-code: "https://github.com/tmagoben/GeneralDIA"
+license: MIT
+version: 3.0.0
+date-released: 2026-08-24

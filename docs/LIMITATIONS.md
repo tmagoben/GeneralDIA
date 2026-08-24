@@ -1,7 +1,45 @@
 # Limitations
 
-1. The default molecular representation is deliberately simple and is not intended to compete with modern E(3)-equivariant architectures.
-2. A diabatic Hamiltonian is generally gauge-dependent and may not be globally unique.
-3. Near exact degeneracies, individual eigenvectors and derivative couplings are gauge-sensitive; subspace/projector quantities should be preferred.
-4. The quantum backends encode a finite state subspace, not a fermionic many-electron Hamiltonian.
-5. Optional PySCF/PennyLane/Qiskit integrations should be exercised in environments where those packages are installed; the core repository remains independent of them.
+## Molecular representation
+
+The default model uses all pair distances and a sum aggregation. It has no angular,
+many-body, periodic, charge-state, or spin-state features. Pair distances cannot
+distinguish enantiomers. The implementation processes one molecule at a time and
+scales quadratically with atom count.
+
+## Diabatic identifiability
+
+Adiabatic energies do not select a unique diabatic Hamiltonian. Gradient targets
+constrain eigenvalue variation but do not remove all gauge freedom. Off-diagonal
+state-sensitive targets need phase and subspace alignment across geometries.
+
+## Degeneracies
+
+Individual eigenvectors become gauge-sensitive near degeneracy. The derivative
+coupling utility suppresses divisions below a user-set gap threshold and can return a
+mask. It does not construct a smooth degenerate-subspace gauge.
+
+## Training scale
+
+The reference trainer uses one geometry per optimizer step and does not provide graph
+batches, distributed training, mixed precision, early stopping, schedulers, or data
+streaming. It serves small experiments and reference implementations.
+
+## Electronic structure
+
+The bundled PySCF symbol table supports elements H through Ca. The SA-CASSCF adapter
+uses equal state weights and assumes users selected a valid active space. Production
+datasets need restart handling, state tracking, and calculation-level failure logs.
+
+## Quantum backends
+
+Pauli expansion requires a state dimension equal to a power of two and costs
+$O(4^n)$ Pauli terms for $n$ qubits. The PennyLane and Qiskit adapters target the
+ground state with a small hardware-efficient ansatz. They do not implement excited
+states, subspace-search VQE, noise models, error mitigation, or fermionic encodings.
+
+## Scientific validation
+
+The synthetic example verifies software integration. It does not establish chemical
+accuracy or suitability for nonadiabatic dynamics. Each application needs external
+reference data and tests designed for its geometry domain.

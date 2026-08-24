@@ -1,33 +1,81 @@
-import numpy as np
-from .ansatz import deterministic_initial_parameters
+"""PennyLane state-space ground-state VQE adapter."""
 
-def _require():
+from __future__ import annotations
+
+from collections.abc import Mapping
+from typing import Any
+
+import numpy as np
+
+from .ansatz import deterministic_initial_parameters, validate_vqe_inputs
+
+
+def _require() -> tuple[Any, Any]:
     try:
         import pennylane as qml
         from scipy.optimize import minimize
-        return qml,minimize
-    except ImportError as e: raise ImportError("Install GeneralDIA with the 'quantum' extra") from e
-def _operator(qml,label):
-    factors=[]
-    for wire,ch in enumerate(label):
-        if ch=='X': factors.append(qml.PauliX(wire))
-        elif ch=='Y': factors.append(qml.PauliY(wire))
-        elif ch=='Z': factors.append(qml.PauliZ(wire))
-    if not factors: return qml.Identity(0)
-    op=factors[0]
-    for f in factors[1:]: op=op@f
-    return op
-def ground_state_vqe(terms,layers=2,maxiter=300):
-    qml,minimize=_require(); n=len(next(iter(terms))); dev=qml.device('default.qubit',wires=n,shots=None)
-    H=qml.Hamiltonian([float(complex(c).real) for c in terms.values()],[_operator(qml,l) for l in terms])
-    @qml.qnode(dev)
-    def energy(theta):
-        p=np.asarray(theta).reshape(layers,n,2)
+    except ImportError as error:
+        raise ImportError("install GeneralDIA with the 'quantum' extra") from error
+    return qml, minimize
+
+
+def _operator(qml: Any, label: str) -> Any:
+    factors = []
+    for wire, character in enumerate(label):
+        if character == "X":
+            factors.append(qml.PauliX(wire))
+        elif character == "Y":
+            factors.append(qml.PauliY(wire))
+        elif character == "Z":
+            factors.append(qml.PauliZ(wire))
+    if not factors:
+        return qml.Identity(0)
+    operator = factors[0]
+    for factor in factors[1:]:
+        operator = operator @ factor
+    return operator
+
+
+def ground_state_vqe(
+    terms: Mapping[str, complex], layers: int = 2, maxiter: int = 300
+) -> dict[str, Any]:
+    """Approximate the lowest eigenvalue with a small hardware-efficient ansatz."""
+
+    real_terms, n_qubits, exact_energy = validate_vqe_inputs(terms, layers, maxiter)
+    qml, minimize = _require()
+    device = qml.device("default.qubit", wires=n_qubits, shots=None)
+    hamiltonian = qml.Hamiltonian(
+        list(real_terms.values()), [_operator(qml, label) for label in real_terms]
+    )
+
+    @qml.qnode(device)
+    def energy(parameters: np.ndarray) -> Any:
+        angles = np.asarray(parameters).reshape(layers, n_qubits, 2)
         for layer in range(layers):
-            for q in range(n): qml.RY(p[layer,q,0],wires=q); qml.RZ(p[layer,q,1],wires=q)
-            if n>1:
-                for q in range(n-1): qml.CNOT(wires=[q,q+1])
-                if n>2: qml.CNOT(wires=[n-1,0])
-        return qml.expval(H)
-    x0=deterministic_initial_parameters(n,layers); result=minimize(lambda x: float(energy(x)),x0,method='COBYLA',options={'maxiter':maxiter,'tol':1e-10})
-    return {'energy':float(result.fun),'parameters':np.asarray(result.x),'success':bool(result.success),'message':str(result.message)}
+            for qubit in range(n_qubits):
+                qml.RY(angles[layer, qubit, 0], wires=qubit)
+                qml.RZ(angles[layer, qubit, 1], wires=qubit)
+            if n_qubits > 1:
+                for qubit in range(n_qubits - 1):
+                    qml.CNOT(wires=[qubit, qubit + 1])
+                if n_qubits > 2:
+                    qml.CNOT(wires=[n_qubits - 1, 0])
+        return qml.expval(hamiltonian)
+
+    initial = deterministic_initial_parameters(n_qubits, layers)
+    result = minimize(
+        lambda values: float(energy(values)),
+        initial,
+        method="COBYLA",
+        options={"maxiter": maxiter, "tol": 1e-10},
+    )
+    value = float(result.fun)
+    return {
+        "energy": value,
+        "exact_energy": exact_energy,
+        "absolute_error": abs(value - exact_energy),
+        "parameters": np.asarray(result.x),
+        "objective_evaluations": int(result.nfev),
+        "success": bool(result.success),
+        "message": str(result.message),
+    }

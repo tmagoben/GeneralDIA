@@ -1,96 +1,196 @@
 # GeneralDIA
 
-GeneralDIA is a compact research-software framework for learning and validating
-finite-state diabatic Hamiltonians from molecular geometry and adiabatic observables.
+GeneralDIA is a research package for constructing geometry-dependent, finite-state
+Hermitian matrices whose eigenvalues and derivatives reproduce selected adiabatic
+molecular observables. The model interprets each matrix as a latent diabatic
+Hamiltonian.
 
-## Scope
+The package keeps the scientific assumptions visible. You can inspect the molecular
+representation, matrix construction, eigendecomposition, Cartesian derivatives, data
+adapters, and finite-state qubit encoding without a hidden training framework.
 
-The central object is a finite electronic-state Hamiltonian
+## Scientific question
+
+For atomic numbers $Z$ and nuclear coordinates $R$, GeneralDIA learns
 
 $$
-H_\theta(R) \in \mathbb{C}^{N_s\times N_s},
+H_\theta(Z,R) \in \mathbb{C}^{N_s\times N_s}.
 $$
 
-where $R$ denotes nuclear geometry. The framework is built around the chain
+Diagonalization produces adiabatic energies and states:
+
+$$
+H_\theta U = U E, \qquad U^\dagger U=I.
+$$
+
+Automatic differentiation then produces energy gradients and the matrix elements
+
+$$
+N_{ij}^{A\alpha} =
+\left\langle \phi_i \middle|
+\frac{\partial H_\theta}{\partial R_{A\alpha}}
+\middle| \phi_j \right\rangle.
+$$
+
+The training loss can constrain energies, energy gradients, and $N_{ij}$. Each target
+adds information about the latent matrix.
+
+## Claim boundary
+
+Energy labels constrain the eigenvalues of $H_\theta$. They do not identify a unique
+diabatic Hamiltonian. A geometry-dependent unitary transformation can change the
+matrix while preserving its spectrum. Physical interpretation requires more
+observables, a documented gauge convention, and validation along connected geometry
+paths.
+
+GeneralDIA currently provides a compact pair-distance model for method development.
+It does not claim the accuracy or scaling of a modern E(3)-equivariant architecture.
+
+## Processing chain
 
 ```text
-molecular geometry
-      |
-      v
-invariant molecular representation
-      |
-      v
-latent H_theta(R)
-      |
-      +--> adiabatic energies / states
-      +--> Cartesian energy gradients
-      +--> Hamiltonian-derivative matrix elements
-      +--> optional PySCF reference data
-      +--> exact classical eigensolver
-      +--> PennyLane/Qiskit state-subspace VQE
+atomic numbers Z + Cartesian positions R
+                    |
+                    v
+validate shapes, units, dtype, and device
+                    |
+                    v
+unordered atom pairs: (Zi, Zj, |Ri - Rj|)
+                    |
+                    v
+sum pair features into an invariant representation
+                    |
+                    v
+predict independent matrix elements
+                    |
+                    v
+construct H_theta with exact matrix symmetry
+                    |
+           +--------+---------+
+           |                  |
+           v                  v
+  classical eigh(H)    finite-state Pauli expansion
+           |                  |
+           v                  v
+ energies, states,      PennyLane/Qiskit ground-state
+ gradients, N_ij        VQE for small state manifolds
 ```
 
-## Important quantum-computing distinction
+## Installation
 
-The PennyLane and Qiskit backends in this repository encode the **finite electronic
-state subspace** represented by $H_\theta$ onto qubits. For example, a two-state
-Hamiltonian is a one-qubit Hamiltonian.
-
-This is **not the same operation** as mapping a second-quantized fermionic molecular
-Hamiltonian to qubits with Jordan-Wigner or Bravyi-Kitaev. PySCF is used here as an
-optional source of ab initio state energies, gradients, and SA-CASSCF nonadiabatic
-couplings. A fermionic quantum-chemistry mapping would be a separate layer.
-
-## Core features
-
-- exact real-symmetric and complex-Hermitian matrix construction;
-- simple pair-distance molecular model with explicit translation, rotation, and
-  atom-order invariance;
-- differentiable adiabatic energies and Cartesian gradients;
-- Hamiltonian Jacobians and off-diagonal derivative matrix elements;
-- complex phase alignment and unitary subspace alignment;
-- optional PySCF RHF and SA-CASSCF reference-data adapters;
-- exact Pauli expansion for $2^n\times2^n$ Hermitian state-space Hamiltonians;
-- optional PennyLane and Qiskit variational state-subspace solvers;
-- deterministic tests for the mathematical invariants claimed by the code.
-
-## Install
-
-Core:
+Create and activate a virtual environment, then install the editable package:
 
 ```bash
-pip install -e ".[dev]"
-pytest -q
+python -m venv .venv
 ```
 
-PySCF interface:
+Windows PowerShell:
+
+```powershell
+.venv\Scripts\Activate.ps1
+python -m pip install --upgrade pip
+python -m pip install -e ".[dev]"
+```
+
+Linux or macOS:
 
 ```bash
-pip install -e ".[pyscf]"
+source .venv/bin/activate
+python -m pip install --upgrade pip
+python -m pip install -e ".[dev]"
 ```
 
-Quantum backends:
+Verify the installation:
 
 ```bash
-pip install -e ".[quantum]"
+pytest
 ```
 
-## Examples
+Optional integrations:
 
 ```bash
-python examples/01_avoided_crossing.py
-python examples/02_molecular_invariance.py
-python examples/03_observable_only_training.py
-python examples/04_pauli_state_encoding.py
+python -m pip install -e ".[pyscf]"
+python -m pip install -e ".[quantum]"
 ```
 
-Optional:
+## Five-minute example
+
+```python
+import torch
+
+from generaldia import SimpleMolecularHamiltonian, derivative_matrix_elements
+
+torch.set_default_dtype(torch.float64)
+torch.manual_seed(7)
+
+# Water geometry. Coordinates use angstrom in this example.
+atomic_numbers = torch.tensor([8, 1, 1])
+positions = torch.tensor(
+    [
+        [0.00, 0.00, 0.00],
+        [0.96, 0.00, 0.00],
+        [-0.24, 0.93, 0.00],
+    ]
+)
+
+model = SimpleMolecularHamiltonian(n_states=2, hidden=32, n_rbf=12)
+energies, eigenvectors, numerators = derivative_matrix_elements(model, atomic_numbers, positions)
+
+print(energies.shape)  # (2,)
+print(eigenvectors.shape)  # (2, 2), eigenvectors occupy columns
+print(numerators.shape)  # (3, 3, 2, 2): atom, Cartesian axis, state, state
+```
+
+The untrained model returns numerical values with the claimed symmetry and tensor
+shapes. Train it before interpreting those values as molecular predictions.
+
+## End-to-end experiment
+
+Run the synthetic experiment:
 
 ```bash
-python examples/pyscf/01_h2_rhf.py
-python examples/pyscf/02_lih_sa_casscf.py
-python examples/quantum/01_pennylane_vqe.py
-python examples/quantum/02_qiskit_vqe.py
+python examples/05_end_to_end_training.py
 ```
 
-See `docs/` for the mathematical conventions and limitations.
+The script performs these operations:
+
+1. Defines a known two-state Hamiltonian along a diatomic bond coordinate.
+2. Calculates reference energies and Cartesian gradients from that Hamiltonian.
+3. Stores each geometry and its targets in a validated `MolecularSample`.
+4. Splits the geometry path into training, validation, and test partitions.
+5. Trains `SimpleMolecularHamiltonian` against energies and gradients.
+6. Reports held-out mean absolute errors.
+7. Saves weights, loss settings, training history, and experiment metadata.
+8. Reloads the checkpoint and checks that its predictions match.
+
+The experiment establishes that the software connects data, training, evaluation,
+and persistence. It does not establish chemical accuracy because the targets come
+from a synthetic Hamiltonian.
+
+## Documentation map
+
+- [Getting started](docs/GETTING_STARTED.md): installation and command-by-command checks.
+- [End-to-end training](docs/TRAINING_WORKFLOW.md): data, losses, fitting, evaluation, and checkpoints.
+- [Data and units](docs/DATA_AND_UNITS.md): tensor shapes and PySCF conversions.
+- [Scientific scope](docs/SCIENTIFIC_SCOPE.md): supported conclusions and identifiability limits.
+- [Architecture](docs/ARCHITECTURE.md): module boundaries and replacement points.
+- [Mathematical conventions](docs/CONVENTIONS.md): eigenvectors, derivative elements, NACs, and Pauli labels.
+- [Quantum encoding](docs/QUANTUM_ENCODING.md): finite-state encoding and its scaling.
+- [Reproducibility](docs/REPRODUCIBILITY.md): records required for a repeatable experiment.
+- [Limitations](docs/LIMITATIONS.md): current model and backend constraints.
+
+## Development checks
+
+```bash
+ruff check .
+ruff format --check .
+pytest --cov=generaldia --cov-report=term-missing
+python -m build
+```
+
+GitHub Actions runs the core suite across supported Python versions and one Windows
+job. Separate scheduled jobs exercise PySCF, PennyLane, and Qiskit.
+
+## License
+
+GeneralDIA uses the MIT License. See [LICENSE](LICENSE).
