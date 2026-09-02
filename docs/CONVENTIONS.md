@@ -29,8 +29,14 @@ explicitly asks it to.
 ## Connected-path state gauge
 
 For raw column eigenvectors $U_k$ and a tracking transformation $W_k$, GeneralDIA
-defines the tracked frame as $\widetilde U_k=U_kW_k$. Every state-indexed matrix uses
-the corresponding covariant transformation $\widetilde A_k=W_k^\dagger A_kW_k$.
+defines the tracked frame and state-indexed observables by
+
+$
+\widetilde U_k = U_k W_k,
+\qquad
+\widetilde A_k = W_k^\dagger A_k W_k.
+$
+
 Nondegenerate states are phase-aligned; exactly degenerate blocks may be rotated as a
 subspace. Individual columns inside such a block are not assigned physical meaning.
 
@@ -55,10 +61,22 @@ is performed by the code.
 
 For two selected states,
 
-$$
-H = \begin{pmatrix}a&u-iv\\u+iv&d\end{pmatrix}
-= \frac{a+d}{2}I + uX + vY + \frac{a-d}{2}Z,
-$$
+$
+H
+=
+\begin{pmatrix}
+a & u-iv \\
+u+iv & d
+\end{pmatrix}
+=
+\frac{a+d}{2}I
++
+uX
++
+vY
++
+\frac{a-d}{2}Z.
+$
 
 so the standard Pauli-$Y$ convention gives $c_Y=-\operatorname{Im}(H_{01})$.
 For four states, $|s_0\rangle,\ldots,|s_3\rangle$ map in order to
