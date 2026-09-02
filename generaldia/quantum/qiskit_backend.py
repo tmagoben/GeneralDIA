@@ -21,6 +21,12 @@ def _require() -> tuple[Any, Any, Any, Any, Any]:
     return QuantumCircuit, ParameterVector, SparsePauliOp, Statevector, minimize
 
 
+def _build_operator(sparse_pauli_op: Any, terms: Mapping[str, float]) -> Any:
+    """Build the backend operator while preserving GeneralDIA label order."""
+
+    return sparse_pauli_op.from_list(list(terms.items()))
+
+
 def ground_state_vqe(
     terms: Mapping[str, complex], layers: int = 2, maxiter: int = 300
 ) -> dict[str, Any]:
@@ -44,7 +50,7 @@ def ground_state_vqe(
 
     # SparsePauliOp strings use left-to-right Kronecker matrix order, matching
     # GeneralDIA labels despite Qiskit's little-endian physical qubit numbering.
-    operator = SparsePauliOp.from_list(list(real_terms.items()))
+    operator = _build_operator(SparsePauliOp, real_terms)
 
     def energy(values: np.ndarray) -> float:
         assignments = dict(zip(parameters, values, strict=True))

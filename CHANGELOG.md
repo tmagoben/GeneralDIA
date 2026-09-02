@@ -1,5 +1,16 @@
 # Changelog
 
+## 3.0.1
+
+- Locked the one-qubit Pauli coefficient normalization and Pauli-$Y$ sign against an
+  independent closed-form oracle.
+- Locked two-qubit labels to left-to-right Kronecker order with analytic `XI`, `IX`,
+  `YZ`, and `ZZ` checks.
+- Added backend-native PennyLane and Qiskit matrix reconstruction tests that do not
+  depend on variational-optimizer convergence.
+- Expanded the finite-state encoding example and documentation with explicit two- and
+  four-state mappings, dimension requirements, and coefficient-pruning semantics.
+
 ## 3.0.0
 
 - Added validated molecular datasets and electronic-structure result checks.

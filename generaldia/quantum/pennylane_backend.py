@@ -36,6 +36,12 @@ def _operator(qml: Any, label: str) -> Any:
     return operator
 
 
+def _build_hamiltonian(qml: Any, terms: Mapping[str, float]) -> Any:
+    """Build the backend Hamiltonian while preserving GeneralDIA label order."""
+
+    return qml.Hamiltonian(list(terms.values()), [_operator(qml, label) for label in terms])
+
+
 def ground_state_vqe(
     terms: Mapping[str, complex], layers: int = 2, maxiter: int = 300
 ) -> dict[str, Any]:
@@ -44,9 +50,7 @@ def ground_state_vqe(
     real_terms, n_qubits, exact_energy = validate_vqe_inputs(terms, layers, maxiter)
     qml, minimize = _require()
     device = qml.device("default.qubit", wires=n_qubits, shots=None)
-    hamiltonian = qml.Hamiltonian(
-        list(real_terms.values()), [_operator(qml, label) for label in real_terms]
-    )
+    hamiltonian = _build_hamiltonian(qml, real_terms)
 
     @qml.qnode(device)
     def energy(parameters: np.ndarray) -> Any:

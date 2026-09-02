@@ -41,4 +41,4 @@ __all__ = [
     "train_model",
 ]
 
-__version__ = "3.0.0"
+__version__ = "3.0.1"

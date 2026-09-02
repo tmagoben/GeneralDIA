@@ -41,3 +41,15 @@ left-most character corresponds to the highest-order tensor factor). Qiskit numb
 physical qubits in little-endian order, but `SparsePauliOp` strings in Qiskit are
 already written in left-to-right matrix/Kronecker order, so no additional re-ordering
 is performed by the code.
+
+For two selected states,
+
+$$
+H = \begin{pmatrix}a&u-iv\\u+iv&d\end{pmatrix}
+= \frac{a+d}{2}I + uX + vY + \frac{a-d}{2}Z,
+$$
+
+so the standard Pauli-$Y$ convention gives $c_Y=-\operatorname{Im}(H_{01})$.
+For four states, $|s_0\rangle,\ldots,|s_3\rangle$ map in order to
+$|00\rangle,|01\rangle,|10\rangle,|11\rangle$; consequently `XI` is
+$X\otimes I$ and `IX` is $I\otimes X$.
