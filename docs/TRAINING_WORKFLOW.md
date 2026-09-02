@@ -88,6 +88,12 @@ Off-diagonal targets require consistent state phases and subspace alignment. Raw
 values from disconnected calculations can change sign or rotate within a degenerate
 subspace.
 
+For connected data, use physical adjacent-state overlaps and the transformations
+described in [Gauge and connected-path state tracking](GAUGE_AND_STATE_TRACKING.md)
+before constructing state-sensitive targets. The current PySCF adapter does not
+generate cross-geometry overlaps, so that information must come from a validated
+electronic-structure workflow.
+
 ## Step 7: train
 
 ```python

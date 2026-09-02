@@ -29,6 +29,10 @@ calculations, preprocessing, and a cryptographic hash of the final data artifact
 python -c "import hashlib,pathlib; p=pathlib.Path('dataset.npz'); print(hashlib.sha256(p.read_bytes()).hexdigest())"
 ```
 
+For a connected state path, also record the overlap-generation method, ordered
+geometry identifiers, state manifold, degeneracy tolerance, overlap floor,
+assignment margin floor, near-degeneracy threshold, and every ambiguous transition.
+
 ## Split
 
 Store the exact sample identifiers in each partition. A seed alone cannot reproduce a
@@ -61,4 +65,5 @@ A published result should include:
 2. immutable dataset identifier and split files;
 3. checkpoint plus model constructor settings;
 4. training history and evaluation outputs;
-5. one command that regenerates the reported metrics.
+5. state-tracking diagnostics when state-indexed targets are used;
+6. one command that regenerates the reported metrics.

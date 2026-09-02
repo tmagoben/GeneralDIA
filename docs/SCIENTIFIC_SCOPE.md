@@ -8,6 +8,7 @@ GeneralDIA supports method development for small finite electronic-state manifol
 - invariant pair-distance molecular models;
 - adiabatic energies and Cartesian derivatives;
 - phase and subspace alignment utilities;
+- overlap-based connected-path state tracking with explicit ambiguity diagnostics;
 - PySCF reference-data adapters;
 - exact Pauli expansion and small ground-state VQE comparisons.
 
@@ -37,6 +38,7 @@ more stable than individual eigenvectors there.
 | Energy fit | The learned spectrum matches labels within the reported error. |
 | Energy and gradient fit | The spectrum and its local geometry variation match labels. |
 | Gauge-consistent off-diagonal fit | The supplied state-sensitive derivative elements match in that gauge. |
+| Unambiguous overlap-tracked path | State character and covariantly transformed matrix elements are continuous over the tested path resolution. |
 | Held-out trajectory tests | The model transfers to the excluded geometry paths covered by the test design. |
 | Comparison with dynamics | The learned representation supports the tested dynamical observable. |
 

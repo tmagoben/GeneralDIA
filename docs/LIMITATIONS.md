@@ -13,11 +13,22 @@ Adiabatic energies do not select a unique diabatic Hamiltonian. Gradient targets
 constrain eigenvalue variation but do not remove all gauge freedom. Off-diagonal
 state-sensitive targets need phase and subspace alignment across geometries.
 
+The connected-path tracker can apply supplied overlap information and diagnose weak
+or tied assignments. It does not generate electronic-structure overlaps or select a
+unique global diabatic gauge.
+
 ## Degeneracies
 
 Individual eigenvectors become gauge-sensitive near degeneracy. The derivative
 coupling utility suppresses divisions below a user-set gap threshold and can return a
 mask. It does not construct a smooth degenerate-subspace gauge.
+
+The tracker aligns a degenerate block when equal-dimensional blocks are present at
+both adjacent geometries. A block that splits or merges is reported as ambiguous; the
+code does not continue with invented individual root identities.
+
+The second-best assignment margin requires repeated assignment solves and is designed
+for the small finite-state manifolds in GeneralDIA, not hundreds of electronic roots.
 
 ## Training scale
 

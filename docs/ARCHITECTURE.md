@@ -57,7 +57,16 @@ state pairs whose gap makes division unstable.
 checkpoint persistence. The loop processes one geometry per optimizer step and favors
 inspection over throughput.
 
-## Layer 6: optional backends
+## Layer 6: connected-path gauge handling
+
+`generaldia.state_tracking` consumes adjacent state-overlap matrices, follows state
+character with maximum-overlap assignment, and applies phase or degenerate-subspace
+Procrustes alignment. It returns the complete raw-to-tracked transformation and
+transition diagnostics. State-indexed matrices transform covariantly with the same
+unitary. External electronic-structure backends remain responsible for calculating
+physical overlaps when their orbital or configuration bases change with geometry.
+
+## Layer 7: optional backends
 
 `generaldia.electronic_structure.pyscf_backend` generates reference calculations.
 `generaldia.quantum` converts a small state-space matrix into Pauli operators and

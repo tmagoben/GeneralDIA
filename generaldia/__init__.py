@@ -12,6 +12,16 @@ from .observables import (
     energy_gradients,
     hamiltonian_jacobian,
 )
+from .state_tracking import (
+    AmbiguousStateTrackingError,
+    StateTrackingResult,
+    StateTrackingStep,
+    SubspaceMatch,
+    adjacent_state_overlaps,
+    align_state_frames,
+    track_states,
+    transform_state_matrices,
+)
 from .training import (
     TrainingConfig,
     evaluate_model,
@@ -21,14 +31,20 @@ from .training import (
 )
 
 __all__ = [
+    "AmbiguousStateTrackingError",
     "GaussianRBF",
     "LossWeights",
     "MolecularDataset",
     "MolecularSample",
     "SimpleMolecularHamiltonian",
+    "StateTrackingResult",
+    "StateTrackingStep",
+    "SubspaceMatch",
     "TrainingConfig",
     "TwoStateAvoidedCrossing",
     "adiabatic_energies",
+    "adjacent_state_overlaps",
+    "align_state_frames",
     "coupling_validity_mask",
     "derivative_couplings_from_numerators",
     "derivative_matrix_elements",
@@ -38,7 +54,9 @@ __all__ = [
     "load_checkpoint",
     "observable_loss",
     "save_checkpoint",
+    "track_states",
     "train_model",
+    "transform_state_matrices",
 ]
 
 __version__ = "3.0.1"

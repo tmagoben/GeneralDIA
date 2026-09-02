@@ -41,7 +41,8 @@ ruff format --check .
 ```
 
 Pytest checks matrix symmetry, molecular invariances, Cartesian derivatives, gauge
-operations, data validation, training, checkpoint loading, and Pauli round trips.
+operations, connected-path state tracking, data validation, training, checkpoint
+loading, and Pauli round trips.
 
 ## 4. Run the analytic reference
 
@@ -73,7 +74,18 @@ point roundoff should keep both values near zero.
 This test establishes invariance of the model construction. It does not measure
 prediction accuracy.
 
-## 6. Run the training workflow
+## 6. Run the state-tracking oracle
+
+```bash
+python examples/06_state_tracking.py
+```
+
+The example crosses a two-state energy-order swap, injects independent complex
+phases, and checks that overlap tracking recovers constant state character. Read
+[GAUGE_AND_STATE_TRACKING.md](GAUGE_AND_STATE_TRACKING.md) before applying the helper
+to electronic-structure outputs.
+
+## 7. Run the training workflow
 
 ```bash
 python examples/05_end_to_end_training.py
@@ -85,7 +97,7 @@ model, evaluates held-out samples, and writes `outputs/synthetic_two_state.pt`.
 Read [TRAINING_WORKFLOW.md](TRAINING_WORKFLOW.md) before replacing the synthetic data
 with electronic-structure results.
 
-## 7. Install an optional backend
+## 8. Install an optional backend
 
 PySCF reference calculations:
 

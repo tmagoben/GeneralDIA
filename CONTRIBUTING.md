@@ -13,7 +13,9 @@ Activate the environment before running checks.
 
 Add tests for new behavior and failure cases. Public functions need type annotations,
 docstrings, shape definitions, unit definitions, and explicit exceptions for invalid
-inputs. Document any gauge or sign convention at the data boundary.
+inputs. Document any gauge or sign convention at the data boundary. State-tracking
+changes need adversarial phase, permutation, degeneracy, and ambiguity-failure tests;
+spectrum-only agreement is not sufficient validation.
 
 ## Run local checks
 
