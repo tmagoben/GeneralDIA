@@ -13,7 +13,16 @@ Activate the environment before running checks.
 
 Add tests for new behavior and failure cases. Public functions need type annotations,
 docstrings, shape definitions, unit definitions, and explicit exceptions for invalid
-inputs. Document any gauge or sign convention at the data boundary.
+inputs. Document any gauge or sign convention at the data boundary. State-tracking
+changes need adversarial phase, permutation, degeneracy, and ambiguity-failure tests;
+spectrum-only agreement is not sufficient validation.
+
+## Documentation and mathematics
+
+For Markdown rendered on GitHub, use `$...$` for inline mathematics and `$$...$$`
+for display mathematics. Prefer explicit LaTeX operators such as `\mathrm{...}`,
+`\operatorname{...}`, and `\dagger`, and keep gauge, index-ordering, and sign
+conventions adjacent to the equations they define.
 
 ## Run local checks
 

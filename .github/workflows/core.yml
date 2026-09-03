@@ -30,3 +30,4 @@ jobs:
       - run: python examples/01_avoided_crossing.py
       - run: python examples/02_molecular_invariance.py
       - run: python examples/04_pauli_state_encoding.py
+      - run: python examples/06_state_tracking.py

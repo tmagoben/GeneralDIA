@@ -175,6 +175,8 @@ from a synthetic Hamiltonian.
 - [Scientific scope](docs/SCIENTIFIC_SCOPE.md): supported conclusions and identifiability limits.
 - [Architecture](docs/ARCHITECTURE.md): module boundaries and replacement points.
 - [Mathematical conventions](docs/CONVENTIONS.md): eigenvectors, derivative elements, NACs, and Pauli labels.
+- [Gauge and state tracking](docs/GAUGE_AND_STATE_TRACKING.md): connected-path overlap
+  assignment, degenerate subspaces, covariance, and ambiguity diagnostics.
 - [Quantum encoding](docs/QUANTUM_ENCODING.md): finite-state encoding and its scaling.
 - [Reproducibility](docs/REPRODUCIBILITY.md): records required for a repeatable experiment.
 - [Limitations](docs/LIMITATIONS.md): current model and backend constraints.
@@ -186,6 +188,7 @@ ruff check .
 ruff format --check .
 pytest --cov=generaldia --cov-report=term-missing
 python -m build
+python examples/06_state_tracking.py
 ```
 
 GitHub Actions runs the core suite across supported Python versions and one Windows

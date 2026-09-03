@@ -26,6 +26,24 @@ $$
 The code exposes $N_{ij}$ directly and does not divide by a small gap unless the user
 explicitly asks it to.
 
+## Connected-path state gauge
+
+For raw column eigenvectors $U_k$ and a tracking transformation $W_k$, GeneralDIA
+defines the tracked frame and state-indexed observables by
+
+$$
+\widetilde U_k = U_k W_k,
+\qquad
+\widetilde A_k = W_k^\dagger A_k W_k.
+$$
+
+Nondegenerate states are phase-aligned; blocks admitted as numerically degenerate by
+the configured tolerance may be rotated as subspaces. Individual columns inside such
+a block are not assigned physical meaning.
+
+See [Gauge and connected-path state tracking](GAUGE_AND_STATE_TRACKING.md) for the
+overlap boundary and ambiguity rules.
+
 ## PySCF scaled NAC convention
 
 PySCF SA-CASSCF defines `state=(ket, bra)` and returns
@@ -45,8 +63,20 @@ is performed by the code.
 For two selected states,
 
 $$
-H = \begin{pmatrix}a&u-iv\\u+iv&d\end{pmatrix}
-= \frac{a+d}{2}I + uX + vY + \frac{a-d}{2}Z,
+H
+=
+\begin{pmatrix}
+a & u-iv \\
+u+iv & d
+\end{pmatrix}
+=
+\frac{a+d}{2}I
++
+uX
++
+vY
++
+\frac{a-d}{2}Z.
 $$
 
 so the standard Pauli-$Y$ convention gives $c_Y=-\operatorname{Im}(H_{01})$.

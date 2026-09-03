@@ -1,5 +1,15 @@
 # Changelog
 
+## Unreleased
+
+- Added overlap-based connected-path state tracking with complex phase correction,
+  numerically degenerate-subspace Procrustes alignment, and fail-closed ambiguity
+  diagnostics.
+- Added covariant transformations for path-indexed state matrices and an independent
+  two-state crossing example.
+- Added adversarial two-, three-, and four-state regression tests for permutations,
+  phases, degenerate rotations, assignment ties, and low-overlap failures.
+
 ## 3.0.1
 
 - Locked the one-qubit Pauli coefficient normalization and Pauli-$Y$ sign against an
