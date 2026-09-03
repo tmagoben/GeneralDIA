@@ -152,9 +152,7 @@ def _largest_first_coloring(
     return tuple(colors)
 
 
-def _exact_coloring(
-    labels: Sequence[str], adjacency: Sequence[frozenset[int]]
-) -> tuple[int, ...]:
+def _exact_coloring(labels: Sequence[str], adjacency: Sequence[frozenset[int]]) -> tuple[int, ...]:
     """Return an exact minimum coloring using branch-and-bound DSATUR search."""
 
     if not labels:
