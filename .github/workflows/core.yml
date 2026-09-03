@@ -31,3 +31,4 @@ jobs:
       - run: python examples/02_molecular_invariance.py
       - run: python examples/04_pauli_state_encoding.py
       - run: python examples/06_state_tracking.py
+      - run: python examples/07_qwc_measurement_grouping.py

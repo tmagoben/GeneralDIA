@@ -69,3 +69,79 @@ Terms satisfying $|c_P|\leq\mathtt{tol}$ are omitted. The default
 `tol=1e-12` makes the returned representation sparse when coefficients are numerically
 negligible, so reconstruction is accurate only up to the discarded terms. Set a
 smaller tolerance when those coefficients are scientifically meaningful.
+
+## Qubit-wise commuting measurement groups
+
+A Pauli expansion can contain many terms even when several terms can be measured from
+the same prepared quantum state. GeneralDIA groups terms using the qubit-wise
+commutativity (QWC) criterion of Verteletskyi, Yen, and Izmaylov.
+
+Two Pauli words $P$ and $Q$ are QWC when, at every tensor-product factor, their local
+operators are equal or at least one is the identity. Equivalently, for every qubit
+index $k$,
+
+$$
+P_k = Q_k
+\quad\text{or}\quad
+P_k = I
+\quad\text{or}\quad
+Q_k = I.
+$$
+
+QWC is stronger than ordinary operator commutativity. For example, $XX$ and $YY$
+commute as two-qubit operators but are not QWC, because each qubit would require two
+different local measurement bases.
+
+GeneralDIA constructs the **conflict graph**, the complement of the QWC graph: each
+non-identity Pauli word is a vertex and an edge joins two vertices that are not QWC.
+A proper coloring of this graph gives simultaneous-measurement groups. Minimizing the
+number of colors is equivalent to the minimum clique cover of the QWC graph.
+
+Use
+
+```python
+from generaldia.quantum import measurement_plan
+
+plan = measurement_plan(terms, method="largest_first")
+```
+
+for the paper's Largest-First greedy coloring heuristic. This is the default because
+it is deterministic, polynomial-time, and was among the strongest inexpensive
+heuristics in the paper's molecular benchmarks. The returned groups are guaranteed
+to be mutually QWC, but the heuristic does not certify the globally minimum number of
+groups.
+
+For small Pauli sets,
+
+```python
+plan = measurement_plan(terms, method="exact")
+```
+
+uses branch-and-bound DSATUR coloring to certify a minimum clique cover. Exact graph
+coloring is exponential in the worst case, so GeneralDIA limits exact mode to 20
+non-identity terms by default. The guard can be changed explicitly with
+`exact_max_terms`.
+
+The all-identity Pauli term is returned separately as `plan.identity_term` because its
+expectation value is exactly one and requires no quantum measurement.
+
+Each `MeasurementGroup` contains a tensor-product `basis` and the corresponding local
+`basis_changes`. The convention is
+
+- `X`: apply `H`, then measure in the computational basis;
+- `Y`: apply `Sdg`, then `H`, then measure in the computational basis;
+- `Z`: measure directly;
+- `I`: no measurement is required for that factor.
+
+Factor indices in `basis_changes` follow GeneralDIA's left-to-right Pauli-label order.
+A backend with different physical-qubit numbering, notably Qiskit's little-endian
+qubit indices, must map those factor positions to physical qubits explicitly.
+
+The runnable example `examples/07_qwc_measurement_grouping.py` reproduces the paper's
+seven-term Eq. (7) grouping into two measurement settings using both Largest-First and
+exact minimum coloring.
+
+This implementation deliberately targets QWC/tensor-product-basis measurements. It
+does not group all globally commuting Pauli words with entangling Clifford basis
+changes; that is a broader measurement-optimization problem with different circuit
+costs and noise trade-offs.

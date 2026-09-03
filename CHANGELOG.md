@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+- Added qubit-wise commuting Pauli measurement grouping using the paper's
+  Largest-First conflict-graph coloring heuristic plus guarded exact minimum coloring
+  for small term sets.
+- Added tensor-product measurement-basis construction, local `H`/`Sdg` basis-change
+  schedules, and explicit no-shot handling for the all-identity term.
+- Added a regression oracle reproducing the two-group optimum for Eq. (7) of
+  Verteletskyi, Yen, and Izmaylov (2020).
 - Added overlap-based connected-path state tracking with complex phase correction,
   numerically degenerate-subspace Procrustes alignment, and fail-closed ambiguity
   diagnostics.
