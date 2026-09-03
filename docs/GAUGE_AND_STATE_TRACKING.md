@@ -123,14 +123,14 @@ python examples/06_state_tracking.py
 
 The example diagonalizes the exact two-state Hamiltonian
 
-$
+$$
 H(x)
 =
 \begin{pmatrix}
 x & 0 \\
 0 & -x
 \end{pmatrix}.
-$
+$$
 
 at points on both sides of the crossing. Ascending energy order swaps the raw states.
 Injected complex phases add independent gauge changes. Exact overlaps recover the

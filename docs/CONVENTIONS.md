@@ -31,14 +31,15 @@ explicitly asks it to.
 For raw column eigenvectors $U_k$ and a tracking transformation $W_k$, GeneralDIA
 defines the tracked frame and state-indexed observables by
 
-$
+$$
 \widetilde U_k = U_k W_k,
 \qquad
 \widetilde A_k = W_k^\dagger A_k W_k.
-$
+$$
 
-Nondegenerate states are phase-aligned; exactly degenerate blocks may be rotated as a
-subspace. Individual columns inside such a block are not assigned physical meaning.
+Nondegenerate states are phase-aligned; blocks admitted as numerically degenerate by
+the configured tolerance may be rotated as subspaces. Individual columns inside such
+a block are not assigned physical meaning.
 
 See [Gauge and connected-path state tracking](GAUGE_AND_STATE_TRACKING.md) for the
 overlap boundary and ambiguity rules.
@@ -61,7 +62,7 @@ is performed by the code.
 
 For two selected states,
 
-$
+$$
 H
 =
 \begin{pmatrix}
@@ -76,7 +77,7 @@ uX
 vY
 +
 \frac{a-d}{2}Z.
-$
+$$
 
 so the standard Pauli-$Y$ convention gives $c_Y=-\operatorname{Im}(H_{01})$.
 For four states, $|s_0\rangle,\ldots,|s_3\rangle$ map in order to
