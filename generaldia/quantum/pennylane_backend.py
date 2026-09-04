@@ -75,6 +75,26 @@ def _apply_measurement_basis(qml: Any, group: Any) -> None:
                 raise ValueError(f"unsupported measurement basis-change gate: {gate}")
 
 
+def _finite_shot_qnode(
+    qml: Any,
+    circuit: Callable[[], Any],
+    *,
+    n_qubits: int,
+    shots: int,
+    seed: int | None,
+) -> Any:
+    """Build a sampled QNode across PennyLane's supported shot-configuration APIs."""
+
+    if hasattr(qml, "set_shots"):
+        device = qml.device("default.qubit", wires=n_qubits, seed=seed)
+        return qml.set_shots(qml.qnode(device)(circuit), shots=shots)
+
+    # PennyLane 0.40 predates qml.set_shots. Device-level shots remain the compatible
+    # fallback for GeneralDIA's declared >=0.40 optional-dependency range.
+    device = qml.device("default.qubit", wires=n_qubits, shots=shots, seed=seed)
+    return qml.qnode(device)(circuit)
+
+
 def build_grouped_measurement_qnodes(
     prepare_state: Callable[[], None],
     plan: MeasurementPlan,
@@ -89,12 +109,6 @@ def build_grouped_measurement_qnodes(
     qnodes = []
     for group_index, group in enumerate(plan.groups):
         device_seed = None if seed is None else int(seed) + group_index
-        device = qml.device(
-            "default.qubit",
-            wires=plan.n_qubits,
-            shots=shots,
-            seed=device_seed,
-        )
 
         def make_circuit(group: Any) -> Callable[[], Any]:
             def circuit() -> Any:
@@ -104,7 +118,15 @@ def build_grouped_measurement_qnodes(
 
             return circuit
 
-        qnodes.append(qml.qnode(device)(make_circuit(group)))
+        qnodes.append(
+            _finite_shot_qnode(
+                qml,
+                make_circuit(group),
+                n_qubits=plan.n_qubits,
+                shots=shots,
+                seed=device_seed,
+            )
+        )
     return tuple(qnodes)
 
 

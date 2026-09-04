@@ -17,6 +17,7 @@ the August-September 2026 development cycle.
 - PennyLane QNode documentation: https://docs.pennylane.ai/en/stable/code/api/pennylane.qnode.html
 - PennyLane Hamiltonian documentation: https://docs.pennylane.ai/en/stable/code/api/pennylane.Hamiltonian.html
 - PennyLane counts documentation: https://docs.pennylane.ai/en/stable/code/api/pennylane.counts.html
+- PennyLane set-shots documentation: https://docs.pennylane.ai/en/stable/code/api/pennylane.set_shots.html
 - Qiskit Statevector documentation: https://docs.quantum.ibm.com/api/qiskit/qiskit.quantum_info.Statevector
 - Qiskit SparsePauliOp documentation: https://docs.quantum.ibm.com/api/qiskit/qiskit.quantum_info.SparsePauliOp
 - Qiskit BasicSimulator documentation: https://quantum.cloud.ibm.com/docs/en/api/qiskit/qiskit.providers.basic_provider.BasicSimulator

@@ -118,7 +118,7 @@ def test_qiskit_grouped_shot_vqe_smoke() -> None:
     pytest.importorskip("qiskit")
     from generaldia.quantum.qiskit_backend import ground_state_vqe_shots
 
-    result = ground_state_vqe_shots({"I": 0.1, "Z": 0.4}, layers=1, maxiter=2, shots=32)
+    result = ground_state_vqe_shots({"I": 0.1, "Z": 0.4}, layers=1, maxiter=4, shots=32)
     assert np.isfinite(result["energy"])
     assert result["measurement_settings"] == 1
     assert result["shots"] == 32
@@ -129,7 +129,7 @@ def test_pennylane_grouped_shot_vqe_smoke() -> None:
     pytest.importorskip("pennylane")
     from generaldia.quantum.pennylane_backend import ground_state_vqe_shots
 
-    result = ground_state_vqe_shots({"I": 0.1, "Z": 0.4}, layers=1, maxiter=2, shots=32)
+    result = ground_state_vqe_shots({"I": 0.1, "Z": 0.4}, layers=1, maxiter=4, shots=32)
     assert np.isfinite(result["energy"])
     assert result["measurement_settings"] == 1
     assert result["shots"] == 32
