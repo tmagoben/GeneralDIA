@@ -1,16 +1,5 @@
 # References
 
-## Latent electronic-state Hamiltonians
-
-- David Juergens, Martin Stöhr, Andreas E. Hillers-Bendtsen, O. Jonathan Fajen, and
-  Todd J. Martínez, "Latent unified smooth Hamiltonians for excited state chemistry,"
-  arXiv:2609.01871v1 (2026), https://doi.org/10.48550/arXiv.2609.01871.
-
-GeneralDIA cites LUSH as motivation for a future shared implicit-basis operator model.
-The current implementation is independent and narrower: it provides path-aware data,
-state-target transformations, visual diagnostics, and finite-state quantum encoding;
-it does not reproduce the LUSH transformer architecture or its molecular benchmarks.
-
 ## Measurement optimization
 
 - Vladyslav Verteletskyi, Tzu-Ching Yen, and Artur F. Izmaylov,

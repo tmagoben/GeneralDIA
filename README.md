@@ -185,6 +185,8 @@ thresholds behind every transition.
   assignment, degenerate subspaces, covariance, and ambiguity diagnostics.
 - [Path-aware workflow](docs/PATH_AWARE_WORKFLOW.md): leakage-resistant splits,
   covariant target construction, and visual evidence reports.
+- [Development roadmap](docs/ROADMAP.md): release gates from path-aware supervision
+  through learned-Hamiltonian quantum benchmarks.
 - [Quantum encoding](docs/QUANTUM_ENCODING.md): finite-state encoding and its scaling.
 - [Reproducibility](docs/REPRODUCIBILITY.md): records required for a repeatable experiment.
 - [Limitations](docs/LIMITATIONS.md): current model and backend constraints.

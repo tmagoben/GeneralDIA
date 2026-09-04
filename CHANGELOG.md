@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Established the staged v3.2-v3.5 roadmap: path-aware invariant supervision first,
+  then a minimal shared Hamiltonian/dipole model, scientific certification, and only
+  then a learned-Hamiltonian quantum benchmark.
 - Added `MolecularPath` and `MolecularPathDataset` for ordered overlap-bearing data
   and deterministic train/validation/test splits that preserve complete paths.
 - Added covariant path-target construction, including fail-closed handling when

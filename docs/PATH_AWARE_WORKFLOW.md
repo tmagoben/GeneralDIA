@@ -109,17 +109,19 @@ Run the complete synthetic example with:
 python examples/08_path_aware_diagnostics.py
 ```
 
-## Relationship to shared latent operators
+## Position in the GeneralDIA roadmap
 
-Path-aware, gauge-consistent targets are the data foundation for a future shared
-latent-operator model. That model may emit a Hamiltonian and transition operators in
-one implicit basis before rotating them into the adiabatic frame, following the
-structural motivation of the LUSH architecture. The present milestone deliberately
-does not add a Pairformer, train transition dipoles, or claim LUSH reproduction.
+This path layer is the first part of the planned v3.2 release. It supplies path-aware
+data, leakage-resistant splitting, tracked target construction, and evidence reports.
+It does not yet complete tracked supervision because the reference loss still compares
+ascending energy ranks. The remaining v3.2 work is to define invariant path losses and
+prove that permutation, phase, and admissible degenerate-subspace choices do not change
+the objective.
 
-GeneralDIA will first require path-independent validation of the target transformations
-and held-out-path evaluation. A later model layer can then be judged against those
-contracts instead of defining its own gauge and visualization behavior.
+Only after those contracts pass should v3.3 introduce a minimal shared latent
+Hamiltonian/dipole model. That sequencing keeps the future model accountable to an
+independent data and validation layer instead of allowing the architecture to define
+its own tracking convention. See the [development roadmap](ROADMAP.md).
 
 ## Claim boundary
 
