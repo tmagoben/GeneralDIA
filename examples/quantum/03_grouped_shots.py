@@ -17,6 +17,7 @@ qiskit_state.h(1)
 qiskit_state.s(1)  # |+Y> on GeneralDIA's left Pauli factor
 qiskit_result = qiskit_grouped_energy(qiskit_state, plan, shots=256, seed=19)
 
+
 # PennyLane: GeneralDIA factor positions map directly to wire indices.
 def prepare_pennylane_state() -> None:
     qml.Hadamard(wires=0)
