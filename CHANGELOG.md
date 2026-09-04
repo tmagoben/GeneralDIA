@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- Added backend-independent reconstruction of grouped Pauli expectation values and
+  Hamiltonian energies from shared finite-shot bitstring histograms.
+- Added Qiskit and PennyLane grouped-shot execution helpers, including explicit
+  cross-backend Pauli/bitstring-ordering regression tests.
+- Added finite-shot grouped VQE paths while preserving the existing analytic VQE
+  objective as the deterministic ideal-state reference.
 - Added qubit-wise commuting Pauli measurement grouping using the paper's
   Largest-First conflict-graph coloring heuristic plus guarded exact minimum coloring
   for small term sets.
