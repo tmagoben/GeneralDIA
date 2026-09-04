@@ -57,7 +57,7 @@ state pairs whose gap makes division unstable.
 checkpoint persistence. The loop processes one geometry per optimizer step and favors
 inspection over throughput.
 
-## Layer 6: connected-path gauge handling
+## Layer 6: path-aware data and gauge handling
 
 `generaldia.state_tracking` consumes adjacent state-overlap matrices, follows state
 character with maximum-overlap assignment, and applies phase or degenerate-subspace
@@ -66,7 +66,21 @@ transition diagnostics. State-indexed matrices transform covariantly with the sa
 unitary. External electronic-structure backends remain responsible for calculating
 physical overlaps when their orbital or configuration bases change with geometry.
 
-## Layer 7: optional backends
+`MolecularPath` binds those overlaps to an ordered sample sequence. A
+`MolecularPathDataset` splits complete paths before flattening them for training, and
+`TrackedMolecularPath` retains the raw targets, transformed targets, thresholds, and
+diagnostics as one inspectable result.
+
+The reference training loss remains geometry-local and energy-rank ordered. It does
+not yet consume state-character-ordered tracked targets across a crossing.
+
+## Layer 7: evidence reporting
+
+`generaldia.reporting` turns a tracked path into a versioned JSON-compatible record
+and a self-contained browser report. Presentation code consumes the recorded
+permutations and diagnostics; it does not independently infer state identities.
+
+## Layer 8: optional backends
 
 `generaldia.electronic_structure.pyscf_backend` generates reference calculations.
 `generaldia.quantum` converts a small state-space matrix into Pauli operators and

@@ -2,6 +2,18 @@
 
 ## Unreleased
 
+- Established the staged v3.2-v3.5 roadmap: path-aware invariant supervision first,
+  then a minimal shared Hamiltonian/dipole model, scientific certification, and only
+  then a learned-Hamiltonian quantum benchmark.
+- Added `MolecularPath` and `MolecularPathDataset` for ordered overlap-bearing data
+  and deterministic train/validation/test splits that preserve complete paths.
+- Added covariant path-target construction, including fail-closed handling when
+  scalar gradients lack the matrix information required inside a degenerate block.
+- Kept tracked state-character targets separate from the existing ascending-energy
+  one-geometry loss; path-aware loss integration remains an explicit later milestone.
+- Added a versioned state-tracking evidence schema and a self-contained interactive
+  HTML report showing energy character, transition confidence, ambiguity reasons,
+  and aligned-overlap heat maps.
 - Added backend-independent reconstruction of grouped Pauli expectation values and
   Hamiltonian energies from shared finite-shot bitstring histograms.
 - Added Qiskit and PennyLane grouped-shot execution helpers, including explicit

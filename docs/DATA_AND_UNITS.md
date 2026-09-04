@@ -14,9 +14,11 @@ one coordinate unit and one energy unit throughout an experiment.
 | Energy gradients | $\partial E/\partial R$ | `(S, N, 3)` | real floating point |
 | Hamiltonian Jacobian | $\partial H/\partial R$ | `(N, 3, S, S)` | real or complex floating point |
 | Derivative matrix elements | $N_{ij}$ | `(N, 3, S, S)` | real or complex floating point |
+| Adjacent state overlaps | $S^{k,k+1}$ | `(K - 1, S, S)` | real or complex floating point |
 
 `N` denotes the number of atoms and `S` denotes the number of selected electronic
 states. Eigenvectors occupy columns of the `(S, S)` eigenvector matrix.
+`K` denotes the number of ordered geometries in one `MolecularPath`.
 
 ## `MolecularSample`
 
@@ -40,6 +42,16 @@ sample = MolecularSample(
 
 The constructor rejects inconsistent shapes, nonfinite values, nonpositive atomic
 numbers, and non-Hermitian derivative matrices.
+
+## `MolecularPath`
+
+A path contains at least two `MolecularSample` objects with the same atomic numbers,
+atom order, and state count. Optional gradient and derivative-matrix targets must be
+present at every path point or none. The overlap at index `k` connects raw state rows
+at geometry `k` to raw state columns at geometry `k + 1`.
+
+Coordinates and energies retain the units declared by the samples. Tracking
+thresholds involving energy gaps therefore use that same energy unit.
 
 ## PySCF boundary
 
