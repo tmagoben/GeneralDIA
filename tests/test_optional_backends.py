@@ -88,9 +88,7 @@ def test_qiskit_grouped_shots_preserve_label_and_bitstring_order() -> None:
 
     assert plan.n_measurement_settings == 1
     assert result["counts"] == ({"00": 128},)
-    assert result["expectations"] == pytest.approx(
-        {"II": 1.0, "YI": 1.0, "IZ": 1.0, "YZ": 1.0}
-    )
+    assert result["expectations"] == pytest.approx({"II": 1.0, "YI": 1.0, "IZ": 1.0, "YZ": 1.0})
     assert result["energy"] == pytest.approx(1.0)
 
 
@@ -111,9 +109,7 @@ def test_pennylane_grouped_shots_reconstruct_shared_expectations() -> None:
 
     assert plan.n_measurement_settings == 1
     assert result["counts"] == ({"00": 128},)
-    assert result["expectations"] == pytest.approx(
-        {"II": 1.0, "YI": 1.0, "IZ": 1.0, "YZ": 1.0}
-    )
+    assert result["expectations"] == pytest.approx({"II": 1.0, "YI": 1.0, "IZ": 1.0, "YZ": 1.0})
     assert result["energy"] == pytest.approx(1.0)
 
 

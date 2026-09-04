@@ -27,9 +27,7 @@ def _validate_counts(counts: Mapping[str, int], n_qubits: int) -> tuple[dict[str
     return normalized, shots
 
 
-def _expectation_from_normalized_counts(
-    counts: Mapping[str, int], shots: int, label: str
-) -> float:
+def _expectation_from_normalized_counts(counts: Mapping[str, int], shots: int, label: str) -> float:
     support = tuple(index for index, character in enumerate(label) if character != "I")
     weighted = 0
     for bitstring, count in counts.items():

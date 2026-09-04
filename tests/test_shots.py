@@ -37,9 +37,7 @@ def test_grouped_energy_includes_identity_without_extra_shots() -> None:
     )
     result = grouped_energy_from_counts(plan, ({"00": 100},))
     assert result["energy"] == pytest.approx(1.0)
-    assert result["expectations"] == pytest.approx(
-        {"II": 1.0, "XI": 1.0, "IX": 1.0, "XX": 1.0}
-    )
+    assert result["expectations"] == pytest.approx({"II": 1.0, "XI": 1.0, "IX": 1.0, "XX": 1.0})
     assert result["shots_per_group"] == (100,)
 
 
