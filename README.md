@@ -48,32 +48,19 @@ It does not claim the accuracy or scaling of a modern E(3)-equivariant architect
 
 ## Processing chain
 
-```text
-atomic numbers Z + Cartesian positions R
-                    |
-                    v
-validate shapes, units, dtype, and device
-                    |
-                    v
-unordered atom pairs: (Zi, Zj, |Ri - Rj|)
-                    |
-                    v
-sum pair features into an invariant representation
-                    |
-                    v
-predict independent matrix elements
-                    |
-                    v
-construct H_theta with exact matrix symmetry
-                    |
-           +--------+---------+
-           |                  |
-           v                  v
-  classical eigh(H)    finite-state Pauli expansion
-           |                  |
-           v                  v
- energies, states,      PennyLane/Qiskit ground-state
- gradients, N_ij        VQE for small state manifolds
+```mermaid
+flowchart TD
+    A["Geometry paths and adjacent overlaps"] --> B["Validate MolecularPath data"]
+    B --> C["Split complete paths"]
+    C --> D["Energy-ranked training samples"]
+    C --> E["Overlap-based state tracking"]
+    E --> F["Tracked targets and evidence"]
+    F --> G["Interactive diagnostics report"]
+    D --> H["Invariant molecular representation"]
+    H --> I["Hermitian latent Hamiltonian"]
+    I --> J["Classical eigensolver and derivatives"]
+    I --> K["Finite-state Pauli expansion"]
+    K --> L["Grouped PennyLane or Qiskit execution"]
 ```
 
 ## Installation
@@ -167,6 +154,25 @@ The experiment establishes that the software connects data, training, evaluation
 and persistence. It does not establish chemical accuracy because the targets come
 from a synthetic Hamiltonian.
 
+## Path-aware visual diagnostics
+
+Connected scans and trajectories can be stored as `MolecularPath` objects and split
+as complete units with `MolecularPathDataset`. State tracking then transforms every
+state-indexed target with the same permutation, phase, or subspace rotation used for
+the electronic frame.
+
+Run:
+
+```bash
+python examples/08_path_aware_diagnostics.py
+```
+
+The example checks that no path identifier leaks across train, validation, and test
+partitions, tracks a phase-scrambled two-state crossing, and writes a self-contained
+interactive report to `outputs/path_tracking_report.html`. The report compares raw
+energy rank with tracked state character and exposes the overlap evidence and
+thresholds behind every transition.
+
 ## Documentation map
 
 - [Getting started](docs/GETTING_STARTED.md): installation and command-by-command checks.
@@ -177,6 +183,8 @@ from a synthetic Hamiltonian.
 - [Mathematical conventions](docs/CONVENTIONS.md): eigenvectors, derivative elements, NACs, and Pauli labels.
 - [Gauge and state tracking](docs/GAUGE_AND_STATE_TRACKING.md): connected-path overlap
   assignment, degenerate subspaces, covariance, and ambiguity diagnostics.
+- [Path-aware workflow](docs/PATH_AWARE_WORKFLOW.md): leakage-resistant splits,
+  covariant target construction, and visual evidence reports.
 - [Quantum encoding](docs/QUANTUM_ENCODING.md): finite-state encoding and its scaling.
 - [Reproducibility](docs/REPRODUCIBILITY.md): records required for a repeatable experiment.
 - [Limitations](docs/LIMITATIONS.md): current model and backend constraints.

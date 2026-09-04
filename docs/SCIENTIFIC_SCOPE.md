@@ -9,6 +9,8 @@ GeneralDIA supports method development for small finite electronic-state manifol
 - adiabatic energies and Cartesian derivatives;
 - phase and subspace alignment utilities;
 - overlap-based connected-path state tracking with explicit ambiguity diagnostics;
+- complete-path dataset splits and covariantly transformed path targets;
+- versioned, self-contained visual reports of tracking evidence;
 - PySCF reference-data adapters;
 - exact Pauli expansion and small ground-state VQE comparisons.
 
