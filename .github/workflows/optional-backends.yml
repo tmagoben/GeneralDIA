@@ -23,6 +23,7 @@ jobs:
           cache: pip
       - run: python -m pip install -e ".[dev,quantum]"
       - run: pytest -m optional
+      - run: python examples/quantum/03_grouped_shots.py
 
   pyscf:
     runs-on: ubuntu-latest

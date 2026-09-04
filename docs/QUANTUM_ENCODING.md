@@ -145,3 +145,66 @@ This implementation deliberately targets QWC/tensor-product-basis measurements. 
 does not group all globally commuting Pauli words with entangling Clifford basis
 changes; that is a broader measurement-optimization problem with different circuit
 costs and noise trade-offs.
+
+## Grouped finite-shot execution
+
+A QWC group needs only one sampled bitstring distribution. If a bitstring $b$ occurs
+$N_b$ times in a group with $M$ total shots, GeneralDIA reconstructs each Pauli word
+$P$ in that group as
+
+$$
+\widehat{\langle P\rangle}
+= \frac{1}{M}\sum_b N_b
+(-1)^{\sum_{k:P_k\neq I} b_k}.
+$$
+
+`grouped_energy_from_counts` applies this reconstruction to every group in a
+`MeasurementPlan`, adds the all-identity coefficient exactly, and returns the total
+energy, each Pauli expectation value, and the number of shots used by each group.
+This reconstruction layer is backend independent.
+
+### Qiskit
+
+`generaldia.quantum.qiskit_backend` provides
+`build_grouped_measurement_circuits`, `run_grouped_measurements`, and
+`grouped_shot_energy`. A state-preparation circuit passed to these helpers must have
+the same number of qubits as the plan and must not already contain classical bits or
+measurements.
+
+For an $n$-qubit GeneralDIA Pauli label, factor index $i$ maps to Qiskit physical qubit
+$n-1-i$. The helper measures physical qubit $j$ into classical bit $j$, so Qiskit's
+displayed count strings line up with GeneralDIA's left-to-right Pauli-label order.
+This mapping is regression-tested with a deterministic $Y\otimes Z$ measurement.
+
+With no explicit backend, execution uses Qiskit's `BasicSimulator`. A compatible
+backend can instead be supplied with `backend=...`, with backend-specific execution
+arguments passed through `run_options`. The helper owns the `shots` argument so it
+cannot be silently overridden through `run_options`.
+
+### PennyLane
+
+`generaldia.quantum.pennylane_backend` provides
+`build_grouped_measurement_qnodes`, `run_grouped_measurements`, and
+`grouped_shot_energy`. The caller supplies a zero-argument `prepare_state` function
+that emits the state-preparation operations. GeneralDIA factor positions map directly
+to PennyLane wire indices, and each QWC group is sampled by its own finite-shot
+`default.qubit` QNode.
+
+The runnable optional-backend example
+`examples/quantum/03_grouped_shots.py` prepares the same deterministic state in both
+frameworks and verifies identical histograms, Pauli expectations, and energy.
+
+### Finite-shot VQE
+
+Both optional backends also expose `ground_state_vqe_shots`. It uses the same RY/RZ
+ansatz as the existing `ground_state_vqe`, but each objective evaluation is assembled
+from grouped finite-shot measurements rather than an analytic expectation value. The
+result reports the shot count, number of measurement settings, and grouping method in
+addition to the usual VQE fields.
+
+Finite-shot optimization is stochastic: the objective can fluctuate between
+iterations, and convergence is not guaranteed to be monotonic. The analytic
+`ground_state_vqe` remains the deterministic ideal-state reference. The present shot
+path assigns the same requested number of shots to every QWC group; variance-aware
+shot allocation, readout mitigation, and hardware-noise mitigation are outside the
+current implementation.
