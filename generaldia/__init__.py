@@ -1,7 +1,14 @@
 """GeneralDIA public API."""
 
 from .analytic import TwoStateAvoidedCrossing
-from .dataset import MolecularDataset, MolecularSample
+from .dataset import (
+    MolecularDataset,
+    MolecularPath,
+    MolecularPathDataset,
+    MolecularSample,
+    PathTrackingSettings,
+    TrackedMolecularPath,
+)
 from .losses import LossWeights, observable_loss
 from .molecular import GaussianRBF, SimpleMolecularHamiltonian
 from .observables import (
@@ -12,6 +19,7 @@ from .observables import (
     energy_gradients,
     hamiltonian_jacobian,
 )
+from .reporting import state_tracking_report_data, write_state_tracking_report
 from .state_tracking import (
     AmbiguousStateTrackingError,
     StateTrackingResult,
@@ -35,11 +43,15 @@ __all__ = [
     "GaussianRBF",
     "LossWeights",
     "MolecularDataset",
+    "MolecularPath",
+    "MolecularPathDataset",
     "MolecularSample",
+    "PathTrackingSettings",
     "SimpleMolecularHamiltonian",
     "StateTrackingResult",
     "StateTrackingStep",
     "SubspaceMatch",
+    "TrackedMolecularPath",
     "TrainingConfig",
     "TwoStateAvoidedCrossing",
     "adiabatic_energies",
@@ -54,9 +66,11 @@ __all__ = [
     "load_checkpoint",
     "observable_loss",
     "save_checkpoint",
+    "state_tracking_report_data",
     "track_states",
     "train_model",
     "transform_state_matrices",
+    "write_state_tracking_report",
 ]
 
 __version__ = "3.0.1"

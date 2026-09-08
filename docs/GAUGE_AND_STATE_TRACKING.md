@@ -153,3 +153,7 @@ additional physical inputs and application-specific validation.
 For reproducibility, record the ordered geometry identifier, overlap-generation
 method, energy units, state manifold, degeneracy tolerance, overlap floor, assignment
 margin floor, near-degeneracy threshold, and every recorded ambiguous transition.
+
+Use `MolecularPath` to keep these overlaps attached to the ordered samples and
+`write_state_tracking_report()` to inspect the recorded continuation. See
+[Path-aware targets and visual diagnostics](PATH_AWARE_WORKFLOW.md).

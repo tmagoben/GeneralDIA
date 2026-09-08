@@ -17,6 +17,10 @@ The connected-path tracker can apply supplied overlap information and diagnose w
 or tied assignments. It does not generate electronic-structure overlaps or select a
 unique global diabatic gauge.
 
+`MolecularPathDataset` prevents complete paths from crossing dataset partitions, but
+it does not determine whether two nominally different paths contain correlated or
+duplicate geometries. Dataset construction must define that higher-level grouping.
+
 ## Degeneracies
 
 Individual eigenvectors become gauge-sensitive near degeneracy. The derivative
@@ -35,6 +39,17 @@ for the small finite-state manifolds in GeneralDIA, not hundreds of electronic r
 The reference trainer uses one geometry per optimizer step and does not provide graph
 batches, distributed training, mixed precision, early stopping, schedulers, or data
 streaming. It serves small experiments and reference implementations.
+
+The reference loss compares ascending adiabatic energy ranks. State-character
+energies produced by path tracking can become non-ascending through a crossing and
+are not accepted as a drop-in replacement. Path-aware invariant loss integration is
+not yet implemented.
+
+## Visual reports
+
+The HTML report communicates stored tracking evidence and contains no molecular
+viewer or live electronic-structure backend. It visualizes the supplied path and
+thresholds; it does not certify that the overlaps are physically correct.
 
 ## Electronic structure
 

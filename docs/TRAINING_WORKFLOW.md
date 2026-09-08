@@ -46,6 +46,26 @@ grouped split by trajectory, molecule, reaction channel, or geometry region. A r
 geometry split can place near-duplicate structures in training and test sets and
 understate the prediction error.
 
+For connected scans or trajectories, make paths explicit and split the paths rather
+than individual geometries:
+
+```python
+from generaldia import MolecularPathDataset
+
+paths = MolecularPathDataset(imported_paths)
+training_paths, validation_paths, test_paths = paths.split(seed=17)
+
+training_data = training_paths.as_dataset()
+validation_data = validation_paths.as_dataset()
+test_data = test_paths.as_dataset()
+```
+
+The current one-geometry loss can consume the raw energy-ranked samples after this
+split. Track state-indexed targets for diagnosis and preservation, but do not feed
+state-character-ordered targets into the energy-rank loss. Path-aware invariant loss
+integration is a separate model-layer milestone. See
+[Path-aware targets and visual diagnostics](PATH_AWARE_WORKFLOW.md).
+
 ## Step 5: construct the model
 
 ```python
@@ -179,6 +199,10 @@ Before calling the learned matrix diabatic, check:
 4. Gauge consistency of off-diagonal targets.
 5. Invariance under translation, rotation, reflection, and atom reordering.
 6. Performance on trajectories or molecules excluded from fitting.
+
+Generate a state-tracking evidence report for every path contributing off-diagonal
+targets. Review energy character, overlap confidence, degeneracy flags, and ambiguous
+transitions rather than relying on an aggregate training loss.
 
 Energy accuracy alone supports a claim about predicted adiabatic energies. It does
 not support a unique diabatic representation.

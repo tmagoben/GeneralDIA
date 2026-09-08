@@ -67,3 +67,7 @@ A published result should include:
 4. training history and evaluation outputs;
 5. state-tracking diagnostics when state-indexed targets are used;
 6. one command that regenerates the reported metrics.
+
+The versioned dictionary from `state_tracking_report_data()` is suitable for the
+state-tracking record. The HTML output is a communication view of that record, not a
+replacement for the underlying numeric data.
