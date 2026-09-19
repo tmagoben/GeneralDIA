@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from math import isfinite
 
 import torch
 from torch import Tensor, nn
@@ -21,6 +22,8 @@ class LossWeights:
 
     def __post_init__(self) -> None:
         values = (self.energy, self.energy_gradient, self.derivative_matrix)
+        if not all(isfinite(value) for value in values):
+            raise ValueError("loss weights must be finite")
         if any(value < 0 for value in values):
             raise ValueError("loss weights cannot be negative")
         if not any(value > 0 for value in values):
@@ -48,8 +51,15 @@ class LossBreakdown:
 
 
 def _mean_squared_error(prediction: Tensor, target: Tensor) -> Tensor:
+    if prediction.shape != target.shape:
+        raise ValueError("prediction and target shapes must match; check the model state count")
     difference = prediction - target
     return torch.mean(torch.abs(difference) ** 2)
+
+
+def _validate_ranked_sample(sample: MolecularSample) -> None:
+    if torch.any(sample.energies[1:] < sample.energies[:-1]):
+        raise ValueError("the one-geometry loss requires ascending energies; use the path loss")
 
 
 def observable_loss(
@@ -66,6 +76,7 @@ def observable_loss(
 
     if weights is None:
         weights = LossWeights()
+    _validate_ranked_sample(sample)
     parameter = next(model.parameters(), None)
     if parameter is None:
         raise ValueError("model must have trainable parameters")
@@ -98,9 +109,7 @@ def observable_loss(
             raise ValueError("derivative-matrix loss requested without matrix targets")
         if derivative is None:
             raise RuntimeError("internal error: derivative tensor was not calculated")
-        target = sample.derivative_matrix_elements.to(
-            device=derivative.device, dtype=derivative.dtype
-        )
+        target = sample.derivative_matrix_elements.to(device=derivative.device)
         derivative_loss = _mean_squared_error(derivative, target)
         total = total + weights.derivative_matrix * derivative_loss
 

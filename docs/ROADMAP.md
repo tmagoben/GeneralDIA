@@ -20,10 +20,16 @@ Planned scope:
 - leakage tests at both path-identifier and higher-level molecular-family boundaries;
 - visual evidence for assignments, confidence thresholds, and ambiguity decisions.
 
-The current path-data and reporting change is the first v3.2 slice. It does not yet
-feed non-ascending tracked state-character energies into `observable_loss()`. The v3.2
-release gate requires an explicitly path-aware invariant loss and adversarial tests
-showing that relabeling or rephasing the same physics leaves that loss unchanged.
+The v3.2.0.dev2 milestone adds the remaining core supervision layer: independently
+tracked predictions, block-invariant losses, a complete-path trainer, explicit
+molecular-family splits, and duplicate-geometry checks. Adversarial real/complex
+tests cover permutation, phase, degenerate rotations, finite-difference gradients,
+and incorrect state continuation. See [the loss contract](PATH_INVARIANT_LOSS.md).
+
+This remains a development checkpoint pending review and the supported-platform CI
+matrix. The synthetic gates pass locally; molecular-reference validation is still
+needed before application claims. Block split/merge transitions remain fail-closed.
+The next architectural milestone is the minimal shared-operator model in v3.3.
 
 ## v3.3: minimal shared latent operators
 

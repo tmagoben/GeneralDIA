@@ -17,9 +17,11 @@ The connected-path tracker can apply supplied overlap information and diagnose w
 or tied assignments. It does not generate electronic-structure overlaps or select a
 unique global diabatic gauge.
 
-`MolecularPathDataset` prevents complete paths from crossing dataset partitions, but
-it does not determine whether two nominally different paths contain correlated or
-duplicate geometries. Dataset construction must define that higher-level grouping.
+`MolecularPathDataset.split(family_key=...)` keeps supplied molecular families
+together. `assert_disjoint_paths()` checks IDs, family labels, and duplicate
+ordered-atom distance matrices across partitions. Family provenance remains the
+caller's responsibility. This geometric screen does not identify atom permutations,
+chemical graph identity, or every source of statistical correlation.
 
 ## Degeneracies
 
@@ -40,10 +42,17 @@ The reference trainer uses one geometry per optimizer step and does not provide 
 batches, distributed training, mixed precision, early stopping, schedulers, or data
 streaming. It serves small experiments and reference implementations.
 
-The reference loss compares ascending adiabatic energy ranks. State-character
-energies produced by path tracking can become non-ascending through a crossing and
-are not accepted as a drop-in replacement. Path-aware invariant loss integration is
-not yet implemented.
+The one-geometry loss compares ascending adiabatic energy ranks. The separate
+`path_observable_loss()` and `train_path_model()` support tracked state character.
+Target and prediction block partitions must agree; initial models with incompatible
+degeneracies require a suitable initialization, not relaxed ambiguity checks.
+
+The path objective compares each Cartesian component's diagonal-block eigenvalues
+and off-block singular values. It loses relative information between components and
+blocks and therefore does not prove a joint gauge equivalence or identify a unique
+latent Hamiltonian. First-order gradients are supported within a fixed accepted
+partition. Higher derivatives through the block-frame operation are unsupported;
+assignment changes and repeated operator singular values can be nonsmooth.
 
 ## Visual reports
 

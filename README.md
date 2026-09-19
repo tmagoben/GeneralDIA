@@ -51,14 +51,17 @@ It does not claim the accuracy or scaling of a modern E(3)-equivariant architect
 ```mermaid
 flowchart TD
     A["Geometry paths and adjacent overlaps"] --> B["Validate MolecularPath data"]
-    B --> C["Split complete paths"]
+    B --> C["Split paths or molecular families"]
     C --> D["Energy-ranked training samples"]
     C --> E["Overlap-based state tracking"]
     E --> F["Tracked targets and evidence"]
     F --> G["Interactive diagnostics report"]
+    F --> M["Block-invariant path loss"]
     D --> H["Invariant molecular representation"]
     H --> I["Hermitian latent Hamiltonian"]
     I --> J["Classical eigensolver and derivatives"]
+    J --> N["Track model predictions"]
+    N --> M
     I --> K["Finite-state Pauli expansion"]
     K --> L["Grouped PennyLane or Qiskit execution"]
 ```
@@ -156,6 +159,18 @@ from a synthetic Hamiltonian.
 
 ## Path-aware visual diagnostics
 
+The current development checkpoint is **v3.2.0.dev2**. It adds invariant path
+supervision and family-level leakage checks after a separately committed audit of
+the prior version. Run the training and incorrect-continuation controls with:
+
+```bash
+python examples/09_invariant_path_training.py
+```
+
+The example stores settings, split membership, invariant losses, and a checkpoint in
+`outputs/invariant_path_training/`. See [the loss contract](docs/PATH_INVARIANT_LOSS.md)
+for its mathematical assumptions and [the audit](docs/AUDIT_2026_09_19.md) for fixes.
+
 Connected scans and trajectories can be stored as `MolecularPath` objects and split
 as complete units with `MolecularPathDataset`. State tracking then transforms every
 state-indexed target with the same permutation, phase, or subspace rotation used for
@@ -185,6 +200,8 @@ thresholds behind every transition.
   assignment, degenerate subspaces, covariance, and ambiguity diagnostics.
 - [Path-aware workflow](docs/PATH_AWARE_WORKFLOW.md): leakage-resistant splits,
   covariant target construction, and visual evidence reports.
+- [Invariant path loss](docs/PATH_INVARIANT_LOSS.md): block invariants, derivatives,
+  complete-path training, family boundaries, and reproducible controls.
 - [Development roadmap](docs/ROADMAP.md): release gates from path-aware supervision
   through learned-Hamiltonian quantum benchmarks.
 - [Quantum encoding](docs/QUANTUM_ENCODING.md): finite-state encoding and its scaling.

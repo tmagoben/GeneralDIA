@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+- v3.2.0.dev2 adds independently tracked model predictions, block-invariant path
+  losses, complete-path training/evaluation, family-preserving splits, and duplicate
+  geometry checks. See [the path-loss contract](docs/PATH_INVARIANT_LOSS.md).
+- Added real/complex permutation, phase, degenerate-block, central-finite-difference,
+  leakage, deterministic training, and checkpoint regression controls.
+- Fixed non-finite tracking tolerances, complex observable truncation and Jacobians,
+  rank-order misuse, and broadcastable state-count mismatches before feature work;
+  see [the prior-version audit](docs/AUDIT_2026_09_19.md).
 - Established the staged v3.2-v3.5 roadmap: path-aware invariant supervision first,
   then a minimal shared Hamiltonian/dipole model, scientific certification, and only
   then a learned-Hamiltonian quantum benchmark.
@@ -10,7 +18,7 @@
 - Added covariant path-target construction, including fail-closed handling when
   scalar gradients lack the matrix information required inside a degenerate block.
 - Kept tracked state-character targets separate from the existing ascending-energy
-  one-geometry loss; path-aware loss integration remains an explicit later milestone.
+  one-geometry loss; the separate path loss now supplies tracked supervision.
 - Added a versioned state-tracking evidence schema and a self-contained interactive
   HTML report showing energy character, transition confidence, ambiguity reasons,
   and aligned-overlap heat maps.

@@ -11,7 +11,7 @@ import torch
 from torch import nn
 
 from .dataset import MolecularDataset
-from .losses import LossWeights, observable_loss
+from .losses import LossWeights, _validate_ranked_sample, observable_loss
 from .observables import derivative_matrix_elements
 
 
@@ -114,6 +114,7 @@ def evaluate_model(model: nn.Module, dataset: MolecularDataset) -> dict[str, flo
     gradient_errors = []
     derivative_errors = []
     for raw_sample in dataset:
+        _validate_ranked_sample(raw_sample)
         sample = raw_sample.to(parameter.device, parameter.dtype)
         if sample.energy_gradients is not None or sample.derivative_matrix_elements is not None:
             energies, _, derivative = derivative_matrix_elements(
@@ -123,6 +124,8 @@ def evaluate_model(model: nn.Module, dataset: MolecularDataset) -> dict[str, flo
             with torch.no_grad():
                 energies = torch.linalg.eigvalsh(model(sample.atomic_numbers, sample.positions))
             derivative = None
+        if energies.shape != sample.energies.shape:
+            raise ValueError("prediction and target state count must match")
         energy_errors.append(torch.abs(energies - sample.energies).detach().cpu())
         if sample.energy_gradients is not None and derivative is not None:
             gradients = torch.diagonal(derivative, dim1=-2, dim2=-1).permute(2, 0, 1)
@@ -130,7 +133,7 @@ def evaluate_model(model: nn.Module, dataset: MolecularDataset) -> dict[str, flo
                 torch.abs(gradients.real - sample.energy_gradients).detach().cpu()
             )
         if sample.derivative_matrix_elements is not None and derivative is not None:
-            target = sample.derivative_matrix_elements.to(derivative.dtype)
+            target = sample.derivative_matrix_elements.to(device=derivative.device)
             derivative_errors.append(torch.abs(derivative - target).detach().cpu())
 
     metrics = {"energy_mae": float(torch.cat(energy_errors).mean())}

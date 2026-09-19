@@ -79,6 +79,17 @@ def hamiltonian_jacobian(
         return result
 
     hamiltonian = evaluate(coordinates)
+    if hamiltonian.is_complex():
+        # Autograd's implicit Jacobian seeds require real outputs. Differentiate
+        # both real components, then restore the complex state-matrix axes.
+        jacobian_parts = torch.autograd.functional.jacobian(
+            lambda value: torch.view_as_real(evaluate(value)),
+            coordinates,
+            create_graph=create_graph,
+            vectorize=True,
+        )
+        jacobian = torch.view_as_complex(jacobian_parts.permute(3, 4, 0, 1, 2).contiguous())
+        return hamiltonian, jacobian
     jacobian = torch.autograd.functional.jacobian(
         evaluate, coordinates, create_graph=create_graph, vectorize=True
     )

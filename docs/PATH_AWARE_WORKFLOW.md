@@ -66,11 +66,11 @@ degenerate block because diagonal values do not determine the missing off-diagon
 matrix elements; GeneralDIA raises in that case.
 
 The tracked energies follow state character and can therefore become non-ascending
-through a crossing. The current one-geometry `observable_loss()` diagonalizes a model
-and compares ascending energy ranks. Do not flatten `tracked.tracked_path` into that
-loss and assume the labels remain compatible. This milestone constructs the tracked
-targets and their evidence; a later path-aware loss must track or compare the model
-predictions under the same explicit gauge/subspace policy.
+through a crossing. The one-geometry `observable_loss()` compares ascending energy
+ranks and rejects non-ascending targets. Use `path_observable_loss()` and
+`train_path_model()` for complete paths. They track predictions independently and
+compare block invariants under the same explicit ambiguity and subspace policy.
+See [the invariant loss contract](PATH_INVARIANT_LOSS.md).
 
 ## Visual communication contract
 
@@ -111,12 +111,11 @@ python examples/08_path_aware_diagnostics.py
 
 ## Position in the GeneralDIA roadmap
 
-This path layer is the first part of the planned v3.2 release. It supplies path-aware
-data, leakage-resistant splitting, tracked target construction, and evidence reports.
-It does not yet complete tracked supervision because the reference loss still compares
-ascending energy ranks. The remaining v3.2 work is to define invariant path losses and
-prove that permutation, phase, and admissible degenerate-subspace choices do not change
-the objective.
+The first v3.2 slice supplied path data, target construction, and evidence reports.
+The v3.2.0.dev2 checkpoint adds invariant supervision, complete-path training, and
+family-level splitting. Pass `family_key="molecular_family"` to `split()` when that
+provenance label exists, and call `assert_disjoint_paths()` on all partitions before
+training and evaluation. No family identity is inferred from a molecular formula.
 
 Only after those contracts pass should v3.3 introduce a minimal shared latent
 Hamiltonian/dipole model. That sequencing keeps the future model accountable to an
