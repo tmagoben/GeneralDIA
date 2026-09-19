@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Iterable, Iterator, Sequence
 from dataclasses import dataclass, field
+from itertools import pairwise
 from typing import Any, Literal
 
 import numpy as np
@@ -554,11 +555,33 @@ class MolecularPathDataset(Sequence[MolecularPath]):
         fractions: tuple[float, float, float] = (0.7, 0.15, 0.15),
         *,
         seed: int = 0,
+        family_key: str | None = None,
     ) -> tuple[MolecularPathDataset, MolecularPathDataset, MolecularPathDataset]:
-        """Split complete paths so no trajectory leaks across partitions."""
+        """Split whole paths, or whole families named by a path metadata key.
+
+        When ``family_key`` is supplied, every path needs a nonempty string value
+        and at least three distinct families are required. Fractions count families,
+        not geometries; unequal family sizes can yield unequal sample fractions.
+        """
 
         if len(self) < 3:
             raise ValueError("a three-way path split requires at least three paths")
+        if family_key is not None:
+            families: dict[str, list[MolecularPath]] = {}
+            for path in self:
+                families.setdefault(_path_family(path, family_key), []).append(path)
+            if len(families) < 3:
+                raise ValueError("a three-way family split requires at least three families")
+            names = sorted(families)
+            train_count, validation_count = _partition_counts(len(names), fractions)
+            indices = np.random.default_rng(seed).permutation(len(names))
+            ends = (0, train_count, train_count + validation_count, len(names))
+            return tuple(
+                MolecularPathDataset(
+                    path for index in indices[start:end] for path in families[names[index]]
+                )
+                for start, end in pairwise(ends)
+            )
         train_count, validation_count = _partition_counts(len(self), fractions)
         indices = np.random.default_rng(seed).permutation(len(self))
         validation_end = train_count + validation_count
@@ -572,9 +595,11 @@ class MolecularPathDataset(Sequence[MolecularPath]):
 
 
 def _partition_counts(size: int, fractions: tuple[float, float, float]) -> tuple[int, int]:
-    if len(fractions) != 3 or any(value <= 0 for value in fractions):
-        raise ValueError("fractions must contain three positive values")
+    if len(fractions) != 3 or any(not np.isfinite(value) or value <= 0 for value in fractions):
+        raise ValueError("fractions must contain three finite positive values")
     total = sum(fractions)
+    if not np.isfinite(total):
+        raise ValueError("fraction sum must be finite")
     normalized = tuple(value / total for value in fractions)
     train_count = max(1, int(np.floor(normalized[0] * size)))
     validation_count = max(1, int(np.floor(normalized[1] * size)))
@@ -582,6 +607,66 @@ def _partition_counts(size: int, fractions: tuple[float, float, float]) -> tuple
         train_count = size - 2
         validation_count = 1
     return train_count, validation_count
+
+
+def _path_family(path: MolecularPath, family_key: str) -> str:
+    if not isinstance(family_key, str) or not family_key.strip():
+        raise ValueError("family_key must be a non-empty metadata key")
+    value = path.metadata.get(family_key)
+    if not isinstance(value, str) or not value.strip():
+        raise ValueError(f"path {path.path_id!r} requires non-empty family metadata {family_key!r}")
+    return value
+
+
+def assert_disjoint_paths(
+    *partitions: MolecularPathDataset,
+    family_key: str | None = None,
+    geometry_tolerance: float = 1e-8,
+) -> None:
+    """Reject shared path IDs, declared families, or duplicate ordered-atom geometries.
+
+    Geometry comparisons use pair distances, so translations and rotations do not
+    conceal duplicates. ``geometry_tolerance`` uses the coordinate unit of the data.
+    Atom ordering must agree; this is not a chemical identity or graph-isomorphism
+    test. Family labels must come from dataset provenance, not inferred formulas.
+    The exhaustive comparison is intended for small reference datasets.
+    """
+
+    if not np.isfinite(geometry_tolerance) or geometry_tolerance < 0:
+        raise ValueError("geometry_tolerance must be finite and nonnegative")
+    cached = []
+    for partition in partitions:
+        families = (
+            {_path_family(path, family_key) for path in partition}
+            if family_key is not None
+            else set()
+        )
+        geometries = [
+            (
+                path.path_id,
+                sample.atomic_numbers.detach().cpu(),
+                torch.cdist(
+                    sample.positions.detach().cpu().double(),
+                    sample.positions.detach().cpu().double(),
+                ),
+            )
+            for path in partition
+            for sample in path
+        ]
+        for prior_ids, prior_families, prior_geometries in cached:
+            if set(partition.path_ids) & prior_ids:
+                raise ValueError("path ID leakage across dataset partitions")
+            if families & prior_families:
+                raise ValueError("molecular-family leakage across dataset partitions")
+            for path_id, atoms, distances in geometries:
+                for prior_id, prior_atoms, prior_distances in prior_geometries:
+                    if torch.equal(atoms, prior_atoms) and torch.allclose(
+                        distances, prior_distances, atol=geometry_tolerance, rtol=0
+                    ):
+                        raise ValueError(
+                            f"duplicate geometry leakage between {prior_id!r} and {path_id!r}"
+                        )
+        cached.append((set(partition.path_ids), families, geometries))
 
 
 def _copy_sample(sample: MolecularSample, *, metadata: dict[str, Any]) -> MolecularSample:
