@@ -11,7 +11,12 @@ import torch
 from torch import Tensor
 
 from .electronic_structure.data import ElectronicStructurePoint
-from .state_tracking import StateTrackingResult, track_states, transform_state_matrices
+from .state_tracking import (
+    StateTrackingResult,
+    _validate_thresholds,
+    track_states,
+    transform_state_matrices,
+)
 
 ANGSTROM_TO_BOHR = 1.889_726_125_457_828_1
 
@@ -78,6 +83,8 @@ class MolecularSample:
     @staticmethod
     def _floating_tensor(value: Tensor) -> Tensor:
         tensor = torch.as_tensor(value)
+        if tensor.is_complex():
+            raise ValueError("positions, energies, and energy gradients must be real")
         if not tensor.is_floating_point():
             tensor = tensor.to(torch.get_default_dtype())
         return tensor
@@ -227,21 +234,13 @@ class PathTrackingSettings:
     on_ambiguous: Literal["raise", "record"] = "raise"
 
     def __post_init__(self) -> None:
-        if not 0 <= self.overlap_floor <= 1:
-            raise ValueError("overlap_floor must lie between zero and one")
-        if self.assignment_margin_floor < 0:
-            raise ValueError("assignment_margin_floor cannot be negative")
-        if self.degeneracy_tolerance < 0:
-            raise ValueError("degeneracy_tolerance cannot be negative")
-        if (
-            self.near_degeneracy_threshold is not None
-            and self.near_degeneracy_threshold < self.degeneracy_tolerance
-        ):
-            raise ValueError(
-                "near_degeneracy_threshold cannot be smaller than degeneracy_tolerance"
-            )
-        if self.on_ambiguous not in {"raise", "record"}:
-            raise ValueError('on_ambiguous must be either "raise" or "record"')
+        _validate_thresholds(
+            self.overlap_floor,
+            self.assignment_margin_floor,
+            self.degeneracy_tolerance,
+            self.near_degeneracy_threshold,
+            self.on_ambiguous,
+        )
 
 
 @dataclass(frozen=True)

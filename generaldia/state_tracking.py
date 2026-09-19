@@ -10,6 +10,7 @@ backends should provide physically meaningful cross-geometry overlaps.
 from __future__ import annotations
 
 from dataclasses import dataclass
+from math import isfinite
 from typing import Literal
 
 import torch
@@ -393,6 +394,11 @@ def _validate_thresholds(
     near_degeneracy_threshold: float | None,
     on_ambiguous: str,
 ) -> None:
+    thresholds = (overlap_floor, assignment_margin_floor, degeneracy_tolerance)
+    if near_degeneracy_threshold is not None:
+        thresholds += (near_degeneracy_threshold,)
+    if not all(isfinite(value) for value in thresholds):
+        raise ValueError("tracking thresholds must be finite")
     if not 0 <= overlap_floor <= 1:
         raise ValueError("overlap_floor must lie between zero and one")
     if assignment_margin_floor < 0:
