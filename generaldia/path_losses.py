@@ -57,6 +57,7 @@ class PathPrediction:
     """Tracked model outputs and detached decisions for an ordered path.
 
     Energies have shape ``(K,S)`` and optional derivative matrices ``(K,N,3,S,S)``.
+    Optional dipoles have shape ``(K,3,S,S)`` and share the derivative-matrix frame.
     Energies follow the first geometry's ascending spectrum, then state character.
     Units follow the model and must match the supplied path targets.
     """
@@ -64,6 +65,7 @@ class PathPrediction:
     energies: Tensor
     derivative_matrices: Tensor | None
     tracking: StateTrackingResult
+    dipole_matrices: Tensor | None = None
 
 
 @dataclass
@@ -72,6 +74,18 @@ class PathLossBreakdown(LossBreakdown):
 
     prediction: PathPrediction
     target: TrackedMolecularPath
+    dipole: Tensor | None = None
+    joint_operator: Tensor | None = None
+
+    def scalars(self) -> dict[str, float]:
+        """Include dimensionless dipole and cross-operator components when requested."""
+
+        result = super().scalars()
+        for name in ("dipole", "joint_operator"):
+            value = getattr(self, name)
+            if value is not None:
+                result[name] = float(value.detach())
+        return result
 
 
 def _training_settings(settings: PathTrackingSettings | None) -> PathTrackingSettings:
@@ -87,20 +101,31 @@ def predict_path(
     *,
     settings: PathTrackingSettings | None = None,
     derivatives: bool = False,
+    dipoles: bool = False,
 ) -> PathPrediction:
     """Track predictions using adjacent eigenvector overlaps in a fixed model basis.
 
     Raises ``ValueError`` for invalid models, dimensions or policy, and
     ``AmbiguousStateTrackingError`` for unsupported continuation. Optional
     derivatives retain a first-order parameter graph, including exact degenerate
-    blocks when used only in block-invariant objectives.
+    blocks when used only in block-invariant objectives. Dipoles require an
+    ``operators(Z,R)`` method returning Hermitian matrices in the same fixed latent
+    basis as ``forward(Z,R)``. A declared model/target charge mismatch raises.
     """
 
     settings = _training_settings(settings)
     parameter = next(model.parameters(), None)
     if parameter is None:
         raise ValueError("model must have trainable parameters")
-    matrices, jacobians, spectra, raw_frames = [], [], [], []
+    matrices, jacobians, spectra, raw_frames, raw_dipoles = [], [], [], [], []
+    if dipoles and not callable(getattr(model, "operators", None)):
+        raise ValueError("dipole prediction requires model.operators(atomic_numbers, positions)")
+    model_charge = getattr(model, "charge", None)
+    if model_charge is not None and any(
+        metadata.get("charge", model_charge) != model_charge
+        for metadata in (path.metadata, *(sample.metadata for sample in path))
+    ):
+        raise ValueError("model and target molecular charge must match")
     for raw_sample in path:
         sample = raw_sample.to(parameter.device, parameter.real.dtype)
         if derivatives:
@@ -113,6 +138,20 @@ def predict_path(
             _validate_hamiltonian(matrix)
         if matrix.shape != (path.n_states, path.n_states):
             raise ValueError("model and path state count must match")
+        if dipoles:
+            result = model.operators(sample.atomic_numbers, sample.positions)
+            _validate_hamiltonian(result.hamiltonian)
+            if result.hamiltonian.shape != matrix.shape or not torch.allclose(
+                result.hamiltonian, matrix, atol=1e-10, rtol=1e-8
+            ):
+                raise ValueError(
+                    "model.forward and model.operators must return the same Hamiltonian"
+                )
+            if result.dipoles.shape != (3, path.n_states, path.n_states):
+                raise ValueError("predicted dipoles must have shape (3, S, S)")
+            for component in result.dipoles:
+                _validate_hamiltonian(component)
+            raw_dipoles.append(result.dipoles)
         matrices.append(matrix)
         spectra.append(torch.linalg.eigvalsh(matrix))
         raw_frames.append(torch.linalg.eigh(matrix.detach())[1])
@@ -127,17 +166,64 @@ def predict_path(
         [energy[list(order)] for energy, order in zip(spectra, permutations, strict=True)]
     )
     derivative_matrices = None
-    if derivatives:
-        numerators = []
-        for index, (matrix, jacobian) in enumerate(zip(matrices, jacobians, strict=True)):
+    dipole_matrices = None
+    if derivatives or dipoles:
+        numerators, transformed_dipoles = [], []
+        for index, matrix in enumerate(matrices):
             groups = _energy_partition(energies[index].detach(), settings.degeneracy_tolerance)
             labels = torch.empty(path.n_states, dtype=torch.long, device=matrix.device)
             for label, group in enumerate(groups):
                 labels[list(group)] = label
             frame = _SubspaceFrame.apply(matrix, labels) @ tracking.transformations[index]
-            numerators.append(frame.mH @ jacobian @ frame)
-        derivative_matrices = torch.stack(numerators)
-    return PathPrediction(tracked_energies, derivative_matrices, tracking)
+            if derivatives:
+                numerators.append(frame.mH @ jacobians[index] @ frame)
+            if dipoles:
+                operator_dtype = torch.promote_types(frame.dtype, raw_dipoles[index].dtype)
+                operator_frame = frame.to(operator_dtype)
+                transformed_dipoles.append(
+                    operator_frame.mH @ raw_dipoles[index].to(operator_dtype) @ operator_frame
+                )
+        derivative_matrices = torch.stack(numerators) if derivatives else None
+        dipole_matrices = torch.stack(transformed_dipoles) if dipoles else None
+    return PathPrediction(tracked_energies, derivative_matrices, tracking, dipole_matrices)
+
+
+def _dipole_descriptors(dipoles: Tensor, groups: tuple[tuple[int, ...], ...]) -> Tensor:
+    """Block trace vectors and Cartesian Gram tensors, including cross components.
+
+    Inputs must already be scaled to dimensionless units. The complete vector and
+    tensor entries make squared descriptor distance invariant to a common spatial
+    rotation. These are partial joint invariants, not a complete gauge certificate.
+    """
+
+    descriptors = []
+    for index, group in enumerate(groups):
+        diagonal = dipoles[:, list(group), :][:, :, list(group)]
+        descriptors.append(diagonal.diagonal(dim1=-2, dim2=-1).sum(-1) / len(group))
+        for other in groups[index:]:
+            block = dipoles[:, list(group), :][:, :, list(other)]
+            gram = torch.einsum("aij,bij->ab", block.conj(), block) / (len(group) * len(other))
+            descriptors.append(gram.reshape(-1))
+    return torch.cat(descriptors)
+
+
+def _joint_descriptors(
+    derivatives: Tensor,
+    dipoles: Tensor,
+    groups: tuple[tuple[int, ...], ...],
+) -> Tensor:
+    """Dimensionless Tr(N_BC^dagger mu_BC) tensors linking both operator families."""
+
+    dtype = torch.promote_types(derivatives.dtype, dipoles.dtype)
+    derivatives, dipoles = derivatives.to(dtype), dipoles.to(dtype)
+    descriptors = []
+    for index, group in enumerate(groups):
+        for other in groups[index:]:
+            numerator = derivatives[..., list(group), :][..., list(other)]
+            dipole = dipoles[..., list(group), :][..., list(other)]
+            cross = torch.einsum("xyij,zij->xyz", numerator.conj(), dipole)
+            descriptors.append((cross / (len(group) * len(other))).reshape(-1))
+    return torch.cat(descriptors)
 
 
 def _block_descriptors(
@@ -172,6 +258,11 @@ def path_observable_loss(
     values define derivative supervision; scalar gradients suffice for singletons
     only. Component MSEs use all descriptor entries over the path. Energy units and
     coordinate units must agree; ``LossWeights`` supplies their relative scaling.
+    Dipole supervision uses block trace vectors and full Cartesian Gram tensors;
+    joint supervision adds cross tensors linking dipoles to full derivative
+    matrices. Both new MSEs use dimensionless, electronically gauge-invariant
+    descriptors and are invariant to a common spatial rotation. Legacy derivative
+    component spectra alone do not have that spatial-invariance guarantee.
 
     Raises for missing overlaps/targets, ambiguous transitions, or incompatible
     target/prediction degeneracy partitions. Recorded ambiguous targets are never
@@ -191,13 +282,18 @@ def path_observable_loss(
         settings = _training_settings(settings)
         raw_path = path
     target = raw_path.tracked(**asdict(settings))
-    needs_derivatives = weights.energy_gradient > 0 or weights.derivative_matrix > 0
-    prediction = predict_path(model, raw_path, settings=settings, derivatives=needs_derivatives)
+    needs_derivatives = (
+        weights.energy_gradient > 0 or weights.derivative_matrix > 0 or weights.joint_operator > 0
+    )
+    needs_dipoles = weights.dipole > 0 or weights.joint_operator > 0
+    prediction = predict_path(
+        model, raw_path, settings=settings, derivatives=needs_derivatives, dipoles=needs_dipoles
+    )
     device = prediction.energies.device
     canonical = torch.argsort(target.tracked_energies[0], stable=True)
     target_energies = target.tracked_energies[:, canonical].to(device=device).detach()
     predicted_values: dict[str, list[Tensor]] = {
-        key: [] for key in ("energy", "gradient", "matrix")
+        key: [] for key in ("energy", "gradient", "matrix", "dipole", "joint_operator")
     }
     target_values: dict[str, list[Tensor]] = {key: [] for key in predicted_values}
 
@@ -211,14 +307,51 @@ def path_observable_loss(
         for group in groups:
             predicted_values["energy"].append(prediction.energies[index, list(group)].sort().values)
             target_values["energy"].append(target_energies[index, list(group)].sort().values)
-        if not needs_derivatives:
+        if not (needs_derivatives or needs_dipoles):
             continue
-        predicted_matrix = prediction.derivative_matrices[index]
+        predicted_matrix = (
+            None
+            if prediction.derivative_matrices is None
+            else prediction.derivative_matrices[index]
+        )
         target_matrix = sample.derivative_matrix_elements
         if target_matrix is not None:
             target_matrix = (
                 target_matrix[:, :, canonical, :][:, :, :, canonical].to(device).detach()
             )
+        if needs_dipoles:
+            if sample.dipole_matrix_elements is None:
+                raise ValueError("dipole supervision requires dipole_matrix_elements targets")
+            target_dipole = (
+                sample.dipole_matrix_elements[:, canonical, :][:, :, canonical].to(device).detach()
+            )
+            predicted_dipole = prediction.dipole_matrices[index]
+            if weights.dipole > 0:
+                predicted_values["dipole"].append(
+                    _dipole_descriptors(predicted_dipole / weights.dipole_scale, groups)
+                )
+                target_values["dipole"].append(
+                    _dipole_descriptors(target_dipole / weights.dipole_scale, groups)
+                )
+            if weights.joint_operator > 0:
+                if target_matrix is None:
+                    raise ValueError(
+                        "joint-operator supervision requires full derivative-matrix targets"
+                    )
+                predicted_values["joint_operator"].append(
+                    _joint_descriptors(
+                        predicted_matrix / weights.derivative_scale,
+                        predicted_dipole / weights.dipole_scale,
+                        groups,
+                    )
+                )
+                target_values["joint_operator"].append(
+                    _joint_descriptors(
+                        target_matrix / weights.derivative_scale,
+                        target_dipole / weights.dipole_scale,
+                        groups,
+                    )
+                )
         if weights.energy_gradient > 0:
             if target_matrix is None:
                 if sample.energy_gradients is None:
@@ -258,6 +391,9 @@ def path_observable_loss(
         total = total + weights.energy_gradient * components["gradient"]
     if components["matrix"] is not None:
         total = total + weights.derivative_matrix * components["matrix"]
+    for name in ("dipole", "joint_operator"):
+        if components[name] is not None:
+            total = total + getattr(weights, name) * components[name]
     return PathLossBreakdown(
         total,
         components["energy"],
@@ -265,4 +401,6 @@ def path_observable_loss(
         components["matrix"],
         prediction,
         target,
+        components["dipole"],
+        components["joint_operator"],
     )
