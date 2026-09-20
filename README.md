@@ -32,8 +32,9 @@ N_{ij}^{A\alpha} =
 \middle| \phi_j \right\rangle.
 $$
 
-The training loss can constrain energies, energy gradients, and $N_{ij}$. Each target
-adds information about the latent matrix.
+The training loss can constrain energies, energy gradients, $N_{ij}$, and dipole
+operators reported in the same electronic frame. Each target adds information about
+the latent matrix.
 
 ## Claim boundary
 
@@ -157,11 +158,32 @@ The experiment establishes that the software connects data, training, evaluation
 and persistence. It does not establish chemical accuracy because the targets come
 from a synthetic Hamiltonian.
 
+## Shared Hamiltonian and dipole operators
+
+The current development checkpoint is **v3.3.0.dev1**. `SharedMolecularOperators`
+provides real or complex Hermitian Hamiltonians and polar-vector dipoles from one
+encoder, with a common tracked electronic frame. Dipole and cross-operator losses
+preserve electronic block gauges and spatial rotations. The compact vector head
+supports neutral systems and has explicit symmetry/expressivity limits.
+
+```bash
+python examples/10_shared_operators.py
+python -m pip install -e ".[pyscf]"
+python examples/pyscf/03_lih_shared_operators.py
+```
+
+The first example exercises complex coupled supervision on an analytic reference.
+The second compares identical-initialization Hamiltonian-only, shared energy-only,
+and energy/dipole training on physical LiH FCI/STO-3G paths. It is a one-molecule
+interpolation experiment, with reference data and checkpoints saved locally.
+See [the operator contract](docs/SHARED_OPERATORS.md) and
+[the benchmark and validation record](docs/V33_VALIDATION.md).
+
 ## Path-aware visual diagnostics
 
-The current development checkpoint is **v3.2.0.dev2**. It adds invariant path
-supervision and family-level leakage checks after a separately committed audit of
-the prior version. Run the training and incorrect-continuation controls with:
+The merged v3.2 milestone supplies invariant path supervision and family-level
+leakage checks after a separately committed prior-version audit. Run the training
+and incorrect-continuation controls with:
 
 ```bash
 python examples/09_invariant_path_training.py
@@ -202,6 +224,9 @@ thresholds behind every transition.
   covariant target construction, and visual evidence reports.
 - [Invariant path loss](docs/PATH_INVARIANT_LOSS.md): block invariants, derivatives,
   complete-path training, family boundaries, and reproducible controls.
+- [Shared operators](docs/SHARED_OPERATORS.md): Hamiltonian/vector dipole models,
+  common gauges, coupled losses, molecular references, and expressivity limits.
+- [v3.3 validation](docs/V33_VALIDATION.md): checks and held-out LiH comparisons.
 - [Development roadmap](docs/ROADMAP.md): release gates from path-aware supervision
   through learned-Hamiltonian quantum benchmarks.
 - [Quantum encoding](docs/QUANTUM_ENCODING.md): finite-state encoding and its scaling.

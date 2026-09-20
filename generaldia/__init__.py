@@ -20,6 +20,7 @@ from .observables import (
     energy_gradients,
     hamiltonian_jacobian,
 )
+from .operators import MolecularOperators, SharedMolecularOperators
 from .path_losses import PathLossBreakdown, PathPrediction, path_observable_loss, predict_path
 from .path_training import evaluate_path_model, train_path_model
 from .reporting import state_tracking_report_data, write_state_tracking_report
@@ -46,12 +47,14 @@ __all__ = [
     "GaussianRBF",
     "LossWeights",
     "MolecularDataset",
+    "MolecularOperators",
     "MolecularPath",
     "MolecularPathDataset",
     "MolecularSample",
     "PathLossBreakdown",
     "PathPrediction",
     "PathTrackingSettings",
+    "SharedMolecularOperators",
     "SimpleMolecularHamiltonian",
     "StateTrackingResult",
     "StateTrackingStep",
@@ -83,4 +86,4 @@ __all__ = [
     "write_state_tracking_report",
 ]
 
-__version__ = "3.2.0.dev2"
+__version__ = "3.3.0.dev1"

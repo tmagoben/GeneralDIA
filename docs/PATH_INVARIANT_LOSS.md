@@ -140,9 +140,11 @@ a positive path loss. Repeated runs are deterministic in the tested CPU setup.
 
 These per-component invariants discard some relative operator information. Zero
 loss does not prove joint gauge equivalence, a unique diabatic Hamiltonian, chemical
-accuracy, or correct nonadiabatic trajectories. Molecular-reference benchmarks,
-the shared Hamiltonian/dipole architecture, and the roadmap's scientific-boundary
-certification remain subsequent work.
+accuracy, or correct nonadiabatic trajectories. They are electronically gauge
+invariant, but the componentwise derivative spectral distances are not generally
+invariant to spatial rotation. v3.3 adds [shared Hamiltonian/dipole operators](SHARED_OPERATORS.md)
+with spatially invariant dipole/cross-tensor losses and a limited LiH molecular
+comparison. The roadmap's scientific-boundary certification remains subsequent work.
 
 ## Local validation snapshot (2026-09-19)
 

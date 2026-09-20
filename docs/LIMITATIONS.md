@@ -7,6 +7,13 @@ many-body, periodic, charge-state, or spin-state features. Pair distances cannot
 distinguish enantiomers. The implementation processes one molecule at a time and
 scales quadratically with atom count.
 
+`SharedMolecularOperators` adds a centered polar-vector dipole head for neutral
+systems. Its vectors lie in the span of centered nuclear positions, excluding
+out-of-plane dipoles for planar geometries. Equivalent atomic environments share
+weights, forcing zero dipoles for homonuclear diatomics, including physically
+allowed transitions. It is a minimal reference model; complex mode does not impose
+SOC, time-reversal, or Kramers constraints.
+
 ## Diabatic identifiability
 
 Adiabatic energies do not select a unique diabatic Hamiltonian. Gradient targets
@@ -47,10 +54,12 @@ The one-geometry loss compares ascending adiabatic energy ranks. The separate
 Target and prediction block partitions must agree; initial models with incompatible
 degeneracies require a suitable initialization, not relaxed ambiguity checks.
 
-The path objective compares each Cartesian component's diagonal-block eigenvalues
+The legacy derivative path objective compares each Cartesian component's diagonal-block eigenvalues
 and off-block singular values. It loses relative information between components and
-blocks and therefore does not prove a joint gauge equivalence or identify a unique
-latent Hamiltonian. First-order gradients are supported within a fixed accepted
+blocks and is not generally invariant to spatial rotation. The new dipole and joint
+terms compare full Cartesian trace/Gram/cross tensors and do have that invariance.
+These remain partial moments: neither objective proves joint gauge equivalence or
+identifies a unique latent Hamiltonian. First-order gradients are supported within a fixed accepted
 partition. Higher derivatives through the block-frame operation are unsupported;
 assignment changes and repeated operator singular values can be nonsmooth.
 
@@ -66,6 +75,11 @@ The bundled PySCF symbol table supports elements H through Ca. The SA-CASSCF ada
 uses equal state weights and assumes users selected a valid active space. Production
 datasets need restart handling, state tracking, and calculation-level failure logs.
 
+The FCI dipole path adapter supplies neutral singlet energies, dipoles, and physical
+cross-geometry overlaps in small orbital spaces. It supplies no gradients or
+coupling numerators. Its default eight-orbital cap is a guard for small reference
+experiments, not a promise of inexpensive scaling for arbitrary electron counts.
+
 ## Quantum backends
 
 Pauli expansion requires a state dimension equal to a power of two and costs
@@ -78,3 +92,8 @@ states, subspace-search VQE, noise models, error mitigation, or fermionic encodi
 The synthetic example verifies software integration. It does not establish chemical
 accuracy or suitability for nonadiabatic dynamics. Each application needs external
 reference data and tests designed for its geometry domain.
+
+The LiH FCI/STO-3G comparison provides limited molecular integration evidence with
+one seed and held-out bond lengths within the same molecule. It does not validate
+unseen-family generalization, chemical accuracy, conical intersections, Berry
+phases, or molecular derivative/dipole joint supervision.

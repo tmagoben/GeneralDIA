@@ -14,6 +14,7 @@ one coordinate unit and one energy unit throughout an experiment.
 | Energy gradients | $\partial E/\partial R$ | `(S, N, 3)` | real floating point |
 | Hamiltonian Jacobian | $\partial H/\partial R$ | `(N, 3, S, S)` | real or complex floating point |
 | Derivative matrix elements | $N_{ij}$ | `(N, 3, S, S)` | real or complex floating point |
+| Dipole matrix elements | $\mu_{c,ij}$ | `(3, S, S)` | real or complex floating point |
 | Adjacent state overlaps | $S^{k,k+1}$ | `(K - 1, S, S)` | real or complex floating point |
 
 `N` denotes the number of atoms and `S` denotes the number of selected electronic
@@ -50,6 +51,13 @@ atom order, and state count. Optional gradient and derivative-matrix targets mus
 present at every path point or none. The overlap at index `k` connects raw state rows
 at geometry `k` to raw state columns at geometry `k + 1`.
 
+The same all-or-none rule applies to dipoles. Supply `dipole_matrix_elements` in
+laboratory Cartesian axes with row=bra and column=ket, in the same raw electronic
+gauge as the other operators. Record charge, dipole unit and origin in metadata.
+All state matrices use the same transformation during tracking. Device transfers
+preserve matrix complex dtypes; real coordinate/energy conversions do not drop
+operator phases.
+
 Coordinates and energies retain the units declared by the samples. Tracking
 thresholds involving energy gaps therefore use that same energy unit.
 
@@ -74,6 +82,12 @@ $$
 
 using `1 angstrom = 1.8897261254578281 bohr`.
 
+`FCIDipoleBackend.calculate_path()` directly returns a `MolecularPath`, with angstrom
+coordinates, hartree total energies, and e*bohr total neutral dipoles about laboratory
+origin zero. It supplies physical cross-AO determinant overlaps and no nuclear
+derivatives. Its provenance and conventions are described in
+[the shared-operator contract](SHARED_OPERATORS.md).
+
 ## Forces and gradients
 
 The package uses energy gradients:
@@ -90,3 +104,7 @@ A force has the opposite sign, $F=-G$. Convert force labels before passing them 
 Energy, gradient, and derivative-matrix losses carry different units and numerical
 scales. Record any shift, scale, or per-state normalization with the dataset. Apply
 the inverse transform before reporting physical errors.
+
+The new dipole and joint path terms divide by fixed positive `dipole_scale` and
+`derivative_scale` before forming their moment descriptors, giving dimensionless
+MSEs. Choose scales before testing or from training data alone and record them.

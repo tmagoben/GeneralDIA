@@ -10,6 +10,8 @@ on:
       - "generaldia/electronic_structure/**"
       - "examples/quantum/**"
       - "examples/pyscf/**"
+      - "tests/test_fci_dipoles.py"
+      - "tests/test_electronic_structure.py"
       - "pyproject.toml"
 
 jobs:
@@ -27,6 +29,8 @@ jobs:
 
   pyscf:
     runs-on: ubuntu-latest
+    env:
+      OMP_NUM_THREADS: "1"
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -34,5 +38,6 @@ jobs:
           python-version: "3.11"
           cache: pip
       - run: python -m pip install -e ".[dev,pyscf]"
-      - run: pytest tests/test_electronic_structure.py
+      - run: pytest tests/test_electronic_structure.py tests/test_fci_dipoles.py
       - run: python examples/pyscf/01_h2_rhf.py
+      - run: python examples/pyscf/03_lih_shared_operators.py

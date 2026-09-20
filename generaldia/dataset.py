@@ -29,6 +29,9 @@ class MolecularSample:
     ``positions`` has shape ``(N, 3)`` and ``energies`` has shape ``(S,)``.
     Optional gradients have shape ``(S, N, 3)``. Optional Hamiltonian-derivative
     matrix elements have shape ``(N, 3, S, S)`` and require a documented gauge.
+    Optional Hermitian dipoles have shape ``(3, S, S)`` in that same electronic
+    gauge. State-matrix rows are bras and columns are kets. Cartesian axes, units,
+    charge and dipole origin belong in metadata; core tensors imply no units.
     """
 
     atomic_numbers: Tensor
@@ -37,6 +40,7 @@ class MolecularSample:
     energy_gradients: Tensor | None = None
     derivative_matrix_elements: Tensor | None = None
     metadata: dict[str, Any] = field(default_factory=dict)
+    dipole_matrix_elements: Tensor | None = None
 
     def __post_init__(self) -> None:
         self.atomic_numbers = torch.as_tensor(self.atomic_numbers, dtype=torch.long)
@@ -81,6 +85,17 @@ class MolecularSample:
             ):
                 raise ValueError("derivative matrix elements must be Hermitian")
 
+        if self.dipole_matrix_elements is not None:
+            dipoles = torch.as_tensor(self.dipole_matrix_elements)
+            if not (dipoles.is_floating_point() or dipoles.is_complex()):
+                dipoles = dipoles.to(torch.get_default_dtype())
+            if dipoles.shape != (3, self.n_states, self.n_states):
+                raise ValueError("dipole_matrix_elements must have shape (3, S, S)")
+            self._require_finite(dipoles, "dipole_matrix_elements")
+            if not torch.allclose(dipoles, dipoles.mH, atol=1e-9, rtol=1e-7):
+                raise ValueError("dipole matrix elements must be Hermitian")
+            self.dipole_matrix_elements = dipoles
+
     @staticmethod
     def _floating_tensor(value: Tensor) -> Tensor:
         tensor = torch.as_tensor(value)
@@ -108,7 +123,10 @@ class MolecularSample:
         return int(self.energies.numel())
 
     def to(self, device: torch.device | str, dtype: torch.dtype) -> MolecularSample:
-        """Return a copy on ``device`` with floating tensors converted to ``dtype``."""
+        """Copy to ``device``, converting real coordinates/energies/gradients to ``dtype``.
+
+        State matrices retain their floating/complex dtype to avoid losing phases.
+        """
 
         return MolecularSample(
             atomic_numbers=self.atomic_numbers.to(device=device),
@@ -125,6 +143,11 @@ class MolecularSample:
                 else self.derivative_matrix_elements.to(device=device)
             ),
             metadata=dict(self.metadata),
+            dipole_matrix_elements=(
+                None
+                if self.dipole_matrix_elements is None
+                else self.dipole_matrix_elements.to(device=device)
+            ),
         )
 
 
@@ -308,6 +331,8 @@ class MolecularPath(Sequence[MolecularSample]):
             raise ValueError(
                 "derivative-matrix targets must be present at every path point or none"
             )
+        if len({sample.dipole_matrix_elements is not None for sample in self._samples}) != 1:
+            raise ValueError("dipole targets must be present at every path point or none")
 
         if adjacent_overlaps is None:
             self.adjacent_overlaps = None
@@ -461,6 +486,11 @@ class MolecularPath(Sequence[MolecularSample]):
                     )
                 )
 
+        dipole_targets = None
+        if self._samples[0].dipole_matrix_elements is not None:
+            raw_dipoles = torch.stack(tuple(s.dipole_matrix_elements for s in self._samples))
+            dipole_targets = transform_state_matrices(raw_dipoles, tracking.transformations)
+
         tracked_samples = []
         for index, (sample, energies) in enumerate(
             zip(self._samples, tracked_energies, strict=True)
@@ -487,6 +517,9 @@ class MolecularPath(Sequence[MolecularSample]):
                         None if derivative_targets is None else derivative_targets[index]
                     ),
                     metadata=metadata,
+                    dipole_matrix_elements=(
+                        None if dipole_targets is None else dipole_targets[index]
+                    ),
                 )
             )
 
@@ -677,4 +710,5 @@ def _copy_sample(sample: MolecularSample, *, metadata: dict[str, Any]) -> Molecu
         energy_gradients=sample.energy_gradients,
         derivative_matrix_elements=sample.derivative_matrix_elements,
         metadata=metadata,
+        dipole_matrix_elements=sample.dipole_matrix_elements,
     )
