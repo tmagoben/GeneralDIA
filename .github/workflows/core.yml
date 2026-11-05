@@ -37,3 +37,4 @@ jobs:
       - run: python examples/10_shared_operators.py
       - run: python examples/11_berry_loop.py
       - run: python examples/12_coupling_numerator_certification.py
+      - run: python examples/13_omitted_state_certification.py
