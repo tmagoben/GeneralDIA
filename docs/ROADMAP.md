@@ -75,6 +75,12 @@ Planned scope:
 - machine-readable certification records linking every supported claim to its test,
   tolerance, dataset provenance, and software revision.
 
+The v3.4 development branch now includes an initial analytic Berry/Wilson-loop
+slice and a fixed-basis derivative-numerator certification slice with independent
+five-point finite differences, optional operator oracles, and near-gap masks.
+See [topology](V34_TOPOLOGY.md) and [numerator checks](V34_NUMERATORS.md).
+These are partial development gates, not a completed v3.4 release.
+
 Passing these tests establishes only the documented finite-state and geometry-domain
 claims. It does not by itself establish trajectory or chemical accuracy.
 
