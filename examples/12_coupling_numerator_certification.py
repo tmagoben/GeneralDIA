@@ -12,9 +12,7 @@ def crossing(numbers, positions):
     del numbers
     x = positions[0, 0]
     coupling = x.new_tensor(1e-9)
-    return torch.stack(
-        (torch.stack((0.07 * x, coupling)), torch.stack((coupling, -0.07 * x)))
-    )
+    return torch.stack((torch.stack((0.07 * x, coupling)), torch.stack((coupling, -0.07 * x))))
 
 
 def detached(numbers, positions):
@@ -33,8 +31,7 @@ def main():
     checks = {
         "independent_reference": positive.reference_checked and positive.passed,
         "near_gap_masked": positive.unresolved_pairs == ((0, 1),),
-        "nonzero_finite_numerator": abs(float(positive.numerators_autograd[0, 0, 0, 1]))
-        > 0.069,
+        "nonzero_finite_numerator": abs(float(positive.numerators_autograd[0, 0, 0, 1])) > 0.069,
         "detached_gradient_detected": not negative.passed,
     }
     result = {
