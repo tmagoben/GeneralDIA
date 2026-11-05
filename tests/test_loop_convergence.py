@@ -49,7 +49,10 @@ def test_conical_intersection_refinements_phase_pi_and_gauge_invariant():
     assert clean.coarse_to_finest_phase_error < 1e-12
     assert clean.minimum_link_singular_value > 0.92
     assert all(abs(abs(p) - math.pi) < 1e-12 for p in clean.phases)
-    assert clean.phases == pytest.approx(gauged.phases, abs=1e-12)
+    assert all(
+        abs(math.atan2(math.sin(a - b), math.cos(a - b))) < 1e-12
+        for a, b in zip(clean.phases, gauged.phases, strict=True)
+    )
 
 
 def test_isospectral_trivial_loop_is_rejected_by_ci_reference():
