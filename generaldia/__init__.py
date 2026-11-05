@@ -36,6 +36,7 @@ from .state_tracking import (
     transform_state_matrices,
 )
 from .topology import LoopHolonomy, closed_loop_overlaps, wilson_loop
+from .truncation import TruncationCertification, certify_state_truncation
 from .training import (
     TrainingConfig,
     evaluate_model,
@@ -64,6 +65,7 @@ __all__ = [
     "StateTrackingStep",
     "SubspaceMatch",
     "TrackedMolecularPath",
+    "TruncationCertification",
     "TrainingConfig",
     "TwoStateAvoidedCrossing",
     "adiabatic_energies",
@@ -71,6 +73,7 @@ __all__ = [
     "align_state_frames",
     "assert_disjoint_paths",
     "certify_coupling_numerators",
+    "certify_state_truncation",
     "closed_loop_overlaps",
     "coupling_validity_mask",
     "derivative_couplings_from_numerators",
