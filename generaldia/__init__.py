@@ -36,7 +36,6 @@ from .state_tracking import (
     transform_state_matrices,
 )
 from .topology import LoopHolonomy, closed_loop_overlaps, wilson_loop
-from .truncation import TruncationCertification, certify_state_truncation
 from .training import (
     TrainingConfig,
     evaluate_model,
@@ -44,6 +43,7 @@ from .training import (
     save_checkpoint,
     train_model,
 )
+from .truncation import TruncationCertification, certify_state_truncation
 
 __all__ = [
     "AmbiguousStateTrackingError",
@@ -65,8 +65,8 @@ __all__ = [
     "StateTrackingStep",
     "SubspaceMatch",
     "TrackedMolecularPath",
-    "TruncationCertification",
     "TrainingConfig",
+    "TruncationCertification",
     "TwoStateAvoidedCrossing",
     "adiabatic_energies",
     "adjacent_state_overlaps",
