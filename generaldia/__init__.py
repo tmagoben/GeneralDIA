@@ -46,6 +46,7 @@ from .training import (
 __all__ = [
     "AmbiguousStateTrackingError",
     "GaussianRBF",
+    "LoopHolonomy",
     "LossWeights",
     "MolecularDataset",
     "MolecularOperators",
@@ -63,13 +64,11 @@ __all__ = [
     "TrackedMolecularPath",
     "TrainingConfig",
     "TwoStateAvoidedCrossing",
-    "LoopHolonomy",
-    "closed_loop_overlaps",
-    "wilson_loop",
     "adiabatic_energies",
     "adjacent_state_overlaps",
     "align_state_frames",
     "assert_disjoint_paths",
+    "closed_loop_overlaps",
     "coupling_validity_mask",
     "derivative_couplings_from_numerators",
     "derivative_matrix_elements",
@@ -87,6 +86,7 @@ __all__ = [
     "train_model",
     "train_path_model",
     "transform_state_matrices",
+    "wilson_loop",
     "write_state_tracking_report",
 ]
 
