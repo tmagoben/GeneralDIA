@@ -36,3 +36,4 @@ jobs:
       - run: python examples/09_invariant_path_training.py
       - run: python examples/10_shared_operators.py
       - run: python examples/11_berry_loop.py
+      - run: python examples/12_coupling_numerator_certification.py
