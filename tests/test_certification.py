@@ -82,11 +82,15 @@ def test_detached_gradient_fails_even_when_energies_are_correct():
 def test_isospectral_wrong_basis_passes_internal_but_fails_oracle():
     x = torch.tensor([[0.2, 0.0, 0.0]], dtype=torch.float64)
     good = certify_coupling_numerators(
-        AvoidedCrossing(coupling=0.03), torch.tensor([1]), x,
+        AvoidedCrossing(coupling=0.03),
+        torch.tensor([1]),
+        x,
         reference_derivative=reference(),
     )
     wrong = certify_coupling_numerators(
-        AvoidedCrossing(coupling=0.03, wrong_basis=True), torch.tensor([1]), x,
+        AvoidedCrossing(coupling=0.03, wrong_basis=True),
+        torch.tensor([1]),
+        x,
         reference_derivative=reference(),
     )
     assert torch.allclose(good.energies, wrong.energies, atol=1e-13)
@@ -97,9 +101,7 @@ def test_isospectral_wrong_basis_passes_internal_but_fails_oracle():
 
 def test_constant_complex_basis_gauge_and_oracle_covariance():
     phase = torch.exp(torch.tensor(0.37j, dtype=torch.complex128))
-    unitary = torch.diag(
-        torch.stack((torch.tensor(1.0j, dtype=torch.complex128), phase))
-    )
+    unitary = torch.diag(torch.stack((torch.tensor(1.0j, dtype=torch.complex128), phase)))
     base = AvoidedCrossing(coupling=0.02)
 
     def rotated(numbers, positions):
@@ -110,7 +112,9 @@ def test_constant_complex_basis_gauge_and_oracle_covariance():
         base, torch.tensor([1]), coordinates, reference_derivative=reference()
     )
     transformed = certify_coupling_numerators(
-        rotated, torch.tensor([1]), coordinates,
+        rotated,
+        torch.tensor([1]),
+        coordinates,
         reference_derivative=unitary.mH @ reference().to(torch.complex128) @ unitary,
     )
     assert original.passed and transformed.passed
@@ -149,7 +153,9 @@ def test_exact_degeneracy_is_not_certified_as_a_state_resolved_coupling():
 def test_control_validation(kwargs, message):
     with pytest.raises(ValueError, match=message):
         certify_coupling_numerators(
-            AvoidedCrossing(), torch.tensor([1]), torch.zeros(1, 3, dtype=torch.float64),
+            AvoidedCrossing(),
+            torch.tensor([1]),
+            torch.zeros(1, 3, dtype=torch.float64),
             **kwargs,
         )
 
@@ -168,7 +174,9 @@ def test_invalid_inputs_and_reference_fail_closed():
         )
     with pytest.raises(ValueError, match="reference_derivative must have shape"):
         certify_coupling_numerators(
-            model, torch.tensor([1]), torch.zeros(1, 3, dtype=torch.float64),
+            model,
+            torch.tensor([1]),
+            torch.zeros(1, 3, dtype=torch.float64),
             reference_derivative=torch.zeros(2, 2),
         )
 
@@ -195,9 +203,7 @@ def test_complex_multiatom_tensor_and_independent_oracle():
             (torch.stack((diagonal, coupling)), torch.stack((coupling.conj(), -diagonal)))
         )
 
-    coordinates = torch.tensor(
-        [[0.3, 0.0, 0.0], [0.0, 0.2, 0.0]], dtype=torch.float64
-    )
+    coordinates = torch.tensor([[0.3, 0.0, 0.0], [0.0, 0.2, 0.0]], dtype=torch.float64)
     target = torch.zeros(2, 3, 2, 2, dtype=torch.complex128)
     target[0, 0, 0, 0] = 0.1
     target[0, 0, 1, 1] = -0.1
@@ -220,16 +226,10 @@ def test_five_point_error_scales_at_fourth_order():
         x = positions[0, 0]
         coupling = x.new_tensor(0.2)
         diagonal = torch.sin(x)
-        return torch.stack(
-            (torch.stack((diagonal, coupling)), torch.stack((coupling, -diagonal)))
-        )
+        return torch.stack((torch.stack((diagonal, coupling)), torch.stack((coupling, -diagonal))))
 
     coordinates = torch.tensor([[0.4, 0.0, 0.0]], dtype=torch.float64)
-    coarse = certify_coupling_numerators(
-        model, torch.tensor([1]), coordinates, step=0.15
-    )
-    fine = certify_coupling_numerators(
-        model, torch.tensor([1]), coordinates, step=0.075
-    )
+    coarse = certify_coupling_numerators(model, torch.tensor([1]), coordinates, step=0.15)
+    fine = certify_coupling_numerators(model, torch.tensor([1]), coordinates, step=0.075)
     assert fine.finite_difference_max_error > 0
     assert 12 < coarse.finite_difference_max_error / fine.finite_difference_max_error < 20
