@@ -163,7 +163,9 @@ def test_control_validation(kwargs, message):
 def test_invalid_inputs_and_reference_fail_closed():
     model = AvoidedCrossing()
     with pytest.raises(ValueError, match="float64 positions"):
-        certify_coupling_numerators(model, torch.tensor([1]), torch.zeros(1, 3))
+        certify_coupling_numerators(
+            model, torch.tensor([1]), torch.zeros(1, 3, dtype=torch.float32)
+        )
     with pytest.raises(ValueError, match="positions must have shape"):
         certify_coupling_numerators(
             model, torch.tensor([1]), torch.zeros(1, 2, dtype=torch.float64)
