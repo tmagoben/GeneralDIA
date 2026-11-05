@@ -78,8 +78,8 @@ def test_molecular_h2_loop_refines_and_is_gauge_invariant():
     )
     before = wilson_loop(loop.cyclic_overlaps)
     after = wilson_loop(links)
-    assert abs(math.atan2(math.sin(before.berry_phase - after.berry_phase),
-                          math.cos(before.berry_phase - after.berry_phase))) < 1e-10
+    delta = before.berry_phase - after.berry_phase
+    assert abs(math.atan2(math.sin(delta), math.cos(delta))) < 1e-10
 
 
 def test_molecular_loop_invalid_closure_fails_closed():
