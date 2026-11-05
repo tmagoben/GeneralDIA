@@ -33,9 +33,7 @@ def main() -> None:
     trivial = torch.tensor([[1.0], [0.0]], dtype=torch.float64).expand(n, -1, -1)
     gauge = torch.exp(1j * (0.3 * phi + torch.sin(5 * phi)))
     ci = wilson_loop(closed_loop_overlaps(frames))
-    gauged = wilson_loop(
-        closed_loop_overlaps(frames.to(torch.complex128) * gauge[:, None, None])
-    )
+    gauged = wilson_loop(closed_loop_overlaps(frames.to(torch.complex128) * gauge[:, None, None]))
     control = wilson_loop(closed_loop_overlaps(trivial))
     reverse = wilson_loop(closed_loop_overlaps(frames.flip(0)))
     tolerance = 1e-9
