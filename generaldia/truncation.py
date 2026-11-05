@@ -59,11 +59,7 @@ def certify_state_truncation(
         "target_gap_floor": target_gap_floor,
     }
     for name, value in controls.items():
-        if (
-            not isfinite(value)
-            or value < 0
-            or (name == "target_gap_floor" and value == 0)
-        ):
+        if not isfinite(value) or value < 0 or (name == "target_gap_floor" and value == 0):
             raise ValueError(f"{name} must be finite and nonnegative (gap floor positive)")
     if omitted_population_tolerance > 1:
         raise ValueError("omitted_population_tolerance cannot exceed one")
@@ -109,9 +105,7 @@ def certify_state_truncation(
     max_population = float(torch.linalg.matrix_norm(perpendicular, ord=2) ** 2)
     residual = h @ q - q @ retained_h
     residual_norm = float(torch.linalg.matrix_norm(residual, ord=2))
-    gap = float(
-        (target_energies[:, None] - full_energies[list(omitted)][None, :]).abs().min()
-    )
+    gap = float((target_energies[:, None] - full_energies[list(omitted)][None, :]).abs().min())
     unresolved = gap < target_gap_floor
     passed = (
         not unresolved
