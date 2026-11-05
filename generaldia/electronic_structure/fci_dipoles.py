@@ -244,8 +244,9 @@ class FCIDipoleBackend:
         closing = np.asarray(
             [
                 [
-                    fci.addons.overlap(bra, ket, last_mo.shape[1], last_mol.nelec,
-                                       s=closing_orbital_overlap)
+                    fci.addons.overlap(
+                        bra, ket, last_mo.shape[1], last_mol.nelec, s=closing_orbital_overlap
+                    )
                     for ket in first_roots
                 ]
                 for bra in last_roots
