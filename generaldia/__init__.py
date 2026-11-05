@@ -34,6 +34,7 @@ from .state_tracking import (
     track_states,
     transform_state_matrices,
 )
+from .topology import LoopHolonomy, closed_loop_overlaps, wilson_loop
 from .training import (
     TrainingConfig,
     evaluate_model,
@@ -62,6 +63,9 @@ __all__ = [
     "TrackedMolecularPath",
     "TrainingConfig",
     "TwoStateAvoidedCrossing",
+    "LoopHolonomy",
+    "closed_loop_overlaps",
+    "wilson_loop",
     "adiabatic_energies",
     "adjacent_state_overlaps",
     "align_state_frames",
