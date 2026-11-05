@@ -55,25 +55,17 @@ def test_isospectral_rotation_exposes_energy_only_false_positive():
 def test_full_and_retained_complex_unitary_gauge_invariance():
     h = _rotated(0.3).to(torch.complex128)
     q = _frame().to(torch.complex128)
-    z = torch.tensor(
-        [[1j, 0, 1], [0, 1j, 0.4], [0.6, 0, -1j]], dtype=torch.complex128
-    )
+    z = torch.tensor([[1j, 0, 1], [0, 1j, 0.4], [0.6, 0, -1j]], dtype=torch.complex128)
     unitary, _ = torch.linalg.qr(z)
     v = torch.tensor([[0, 1j], [1, 0]], dtype=torch.complex128)
     base = certify_state_truncation(h, q)
     changed = certify_state_truncation(unitary.mH @ h @ unitary, unitary.mH @ q @ v)
-    assert changed.maximum_energy_error == pytest.approx(
-        base.maximum_energy_error, abs=1e-12
-    )
+    assert changed.maximum_energy_error == pytest.approx(base.maximum_energy_error, abs=1e-12)
     assert changed.maximum_omitted_population == pytest.approx(
         base.maximum_omitted_population, abs=1e-12
     )
-    assert changed.residual_operator_norm == pytest.approx(
-        base.residual_operator_norm, abs=1e-12
-    )
-    assert changed.minimum_target_gap == pytest.approx(
-        base.minimum_target_gap, abs=1e-12
-    )
+    assert changed.residual_operator_norm == pytest.approx(base.residual_operator_norm, abs=1e-12)
+    assert changed.minimum_target_gap == pytest.approx(base.minimum_target_gap, abs=1e-12)
     assert changed.passed == base.passed
 
 
@@ -107,9 +99,7 @@ def test_explicit_nonlowest_manifold():
             "finite",
         ),
         (
-            torch.tensor(
-                [[0.0, 1, 0], [0, 1, 0], [0, 0, 2]], dtype=torch.float64
-            ),
+            torch.tensor([[0.0, 1, 0], [0, 1, 0], [0, 0, 2]], dtype=torch.float64),
             _frame(),
             "Hermitian",
         ),
