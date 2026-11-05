@@ -11,6 +11,7 @@ from .dataset import (
     TrackedMolecularPath,
     assert_disjoint_paths,
 )
+from .loop_convergence import AbelianLoopConvergence, certify_abelian_loop_convergence
 from .losses import LossWeights, observable_loss
 from .molecular import GaussianRBF, SimpleMolecularHamiltonian
 from .observables import (
@@ -46,6 +47,7 @@ from .training import (
 from .truncation import TruncationCertification, certify_state_truncation
 
 __all__ = [
+    "AbelianLoopConvergence",
     "AmbiguousStateTrackingError",
     "GaussianRBF",
     "LoopHolonomy",
@@ -72,6 +74,7 @@ __all__ = [
     "adjacent_state_overlaps",
     "align_state_frames",
     "assert_disjoint_paths",
+    "certify_abelian_loop_convergence",
     "certify_coupling_numerators",
     "certify_state_truncation",
     "closed_loop_overlaps",
