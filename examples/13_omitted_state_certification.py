@@ -36,8 +36,7 @@ def main():
                 rtol=0,
             )
         ),
-        "energy_only_false_positive": rotated.maximum_energy_error
-        < thresholds["energy_tolerance"],
+        "energy_only_false_positive": rotated.maximum_energy_error < thresholds["energy_tolerance"],
         "omitted_state_detected": not rotated.passed
         and rotated.maximum_omitted_population > thresholds["omitted_population_tolerance"],
         "coupling_residual_detected": rotated.residual_operator_norm
