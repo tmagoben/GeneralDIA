@@ -1,6 +1,7 @@
 """GeneralDIA public API."""
 
 from .analytic import TwoStateAvoidedCrossing
+from .certification import NumeratorCertification, certify_coupling_numerators
 from .dataset import (
     MolecularDataset,
     MolecularPath,
@@ -53,6 +54,7 @@ __all__ = [
     "MolecularPath",
     "MolecularPathDataset",
     "MolecularSample",
+    "NumeratorCertification",
     "PathLossBreakdown",
     "PathPrediction",
     "PathTrackingSettings",
@@ -68,6 +70,7 @@ __all__ = [
     "adjacent_state_overlaps",
     "align_state_frames",
     "assert_disjoint_paths",
+    "certify_coupling_numerators",
     "closed_loop_overlaps",
     "coupling_validity_mask",
     "derivative_couplings_from_numerators",
