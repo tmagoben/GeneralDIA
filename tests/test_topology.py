@@ -28,9 +28,7 @@ def test_ci_and_trivial_paths_have_same_spectrum_but_different_topology():
     trivial = torch.tensor([[1.0], [0.0]], dtype=torch.float64).expand(80, -1, -1)
     ci = wilson_loop(closed_loop_overlaps(ground))
     control = wilson_loop(closed_loop_overlaps(trivial))
-    assert torch.allclose(
-        energies, torch.tensor([-1.0, 1.0], dtype=torch.float64), atol=1e-12
-    )
+    assert torch.allclose(energies, torch.tensor([-1.0, 1.0], dtype=torch.float64), atol=1e-12)
     assert _distance(ci.berry_phase, math.pi) < 1e-10
     assert _distance(control.berry_phase, 0.0) < 1e-10
     assert ci.minimum_link_singular_value > 0.99
@@ -43,9 +41,7 @@ def test_complex_gauge_reversal_and_nonquantized_phase():
     base = torch.zeros((n, 2, 1), dtype=torch.complex128)
     base[:, 0, 0] = math.cos(alpha / 2)
     base[:, 1, 0] = math.sin(alpha / 2) * torch.exp(1j * phi)
-    gauged = base * torch.exp(
-        1j * (1.2 * torch.sin(3 * phi) + 0.7 * phi)
-    ).reshape(n, 1, 1)
+    gauged = base * torch.exp(1j * (1.2 * torch.sin(3 * phi) + 0.7 * phi)).reshape(n, 1, 1)
     clean_phase = wilson_loop(closed_loop_overlaps(base)).berry_phase
     gauged_phase = wilson_loop(closed_loop_overlaps(gauged)).berry_phase
     reverse_phase = wilson_loop(closed_loop_overlaps(gauged.flip(0))).berry_phase
@@ -66,9 +62,7 @@ def test_nonabelian_wilson_eigenvalues_and_conjugacy():
     baseline = wilson_loop(closed_loop_overlaps(frames))
 
     torch.manual_seed(37)
-    z = torch.randn(n, 2, 2, dtype=torch.float64) + 1j * torch.randn(
-        n, 2, 2, dtype=torch.float64
-    )
+    z = torch.randn(n, 2, 2, dtype=torch.float64) + 1j * torch.randn(n, 2, 2, dtype=torch.float64)
     q, r = torch.linalg.qr(z)
     diagonal = torch.diagonal(r, dim1=-2, dim2=-1)
     gauges = q @ torch.diag_embed(diagonal / torch.abs(diagonal)).mH
@@ -78,9 +72,7 @@ def test_nonabelian_wilson_eigenvalues_and_conjugacy():
         torch.tensor([-math.pi, 0.0], dtype=torch.float64),
         atol=1e-9,
     )
-    assert torch.allclose(
-        rotated.wilson, gauges[0].mH @ baseline.wilson @ gauges[0], atol=1e-10
-    )
+    assert torch.allclose(rotated.wilson, gauges[0].mH @ baseline.wilson @ gauges[0], atol=1e-10)
     assert torch.allclose(
         torch.sort(torch.linalg.eigvals(rotated.wilson).real).values,
         torch.tensor([-1.0, 1.0], dtype=torch.float64),
