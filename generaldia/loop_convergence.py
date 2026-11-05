@@ -6,9 +6,9 @@ overlaps. Reference-phase checking is optional and must be separately justified.
 
 from __future__ import annotations
 
+from collections.abc import Sequence
 from dataclasses import dataclass
-from math import atan2, isfinite, sin, cos
-from typing import Sequence
+from math import atan2, cos, isfinite, sin
 
 from torch import Tensor
 
