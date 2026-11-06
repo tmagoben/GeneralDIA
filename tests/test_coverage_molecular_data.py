@@ -151,8 +151,8 @@ def test_dataset_slicing_preserves_state_count_and_tags():
     assert isinstance(subset, MolecularDataset)
     assert len(subset) == 2
     assert subset.n_states == 2
-    assert list(iter(dataset)) == list(iter(dataset))
-    assert dataset[0] is subset[0] or dataset[1] is subset[0]
+    assert all(left is right for left, right in zip(dataset, dataset, strict=True))
+    assert dataset[1] is subset[0]
 
 
 @pytest.mark.parametrize(
