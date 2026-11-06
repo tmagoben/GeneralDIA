@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import asdict, dataclass
+from math import isfinite
 from pathlib import Path
 from typing import Any
 
@@ -28,10 +29,12 @@ class TrainingConfig:
     def __post_init__(self) -> None:
         if self.epochs < 1:
             raise ValueError("epochs must be positive")
-        if self.learning_rate <= 0:
-            raise ValueError("learning_rate must be positive")
-        if self.gradient_clip_norm is not None and self.gradient_clip_norm <= 0:
-            raise ValueError("gradient_clip_norm must be positive or None")
+        if not isfinite(self.learning_rate) or self.learning_rate <= 0:
+            raise ValueError("learning_rate must be finite and positive")
+        if self.gradient_clip_norm is not None and (
+            not isfinite(self.gradient_clip_norm) or self.gradient_clip_norm <= 0
+        ):
+            raise ValueError("gradient_clip_norm must be finite and positive or None")
         if self.report_every < 1:
             raise ValueError("report_every must be positive")
 
