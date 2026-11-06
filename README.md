@@ -214,12 +214,31 @@ certification remain separate scientific gates.
 
 ## Charged molecular reference development (v3.4.0.dev2)
 
-The current development branch extends the optional singlet-FCI PySCF reference
+The v3.4.0.dev2 checkpoint extended the optional singlet-FCI PySCF reference
 adapter with explicit molecular charge. Its H3+ tests check charge/electron
 count, orbital overlap and the ionic total-dipole translation law. They do
-**not** yet establish a molecular conical-intersection Berry phase. See
+**not** by themselves establish a molecular conical-intersection Berry phase. See
 [charged singlet references](docs/V34_CHARGED_FCI.md) and
 [the next physical CI milestone](https://github.com/tmagoben/GeneralDIA/issues/9).
+
+## Physical H3+ conical-intersection benchmark (v3.4.0.dev3)
+
+The current branch computes **actual molecular** FCI wavefunctions around the
+symmetry-required degeneracy of H3+'s first two excited singlet states. It
+checks two-coordinate branching, state isolation, physical cross-AO cyclic
+overlaps, enclosing pi Berry phases, nonenclosing zero phase, reverse
+orientation, complex gauge covariance and mesh refinement. GitHub Actions
+runs the real PySCF calculation and archives its pass/fail JSON evidence.
+
+```bash
+python -m pip install -e ".[dev,pyscf]"
+pytest tests/test_h3plus_geometry.py tests/test_h3plus_ci.py -q
+python examples/15_h3plus_molecular_ci.py
+```
+
+Read [the physical H3+ CI certificate](docs/V34_H3PLUS_CI.md) for the
+scientific controls and limitations. This does not certify molecular
+derivative couplings, SOC, or nonadiabatic nuclear trajectories.
 
 ## Path-aware visual diagnostics
 
