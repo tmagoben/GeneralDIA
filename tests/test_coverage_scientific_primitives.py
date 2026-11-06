@@ -35,9 +35,7 @@ def test_analytic_reference_accepts_integer_input_and_preserves_exact_spectrum()
     assert hamiltonians.shape == (3, 2, 2)
     assert hamiltonians.dtype == torch.float64
     torch.testing.assert_close(hamiltonians, hamiltonians.mT)
-    torch.testing.assert_close(
-        torch.linalg.eigvalsh(hamiltonians), model.exact_energies(positions)
-    )
+    torch.testing.assert_close(torch.linalg.eigvalsh(hamiltonians), model.exact_energies(positions))
     assert model.exact_energies(2).shape == (2,)
 
 
