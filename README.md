@@ -160,7 +160,7 @@ from a synthetic Hamiltonian.
 
 ## Shared Hamiltonian and dipole operators
 
-The current development checkpoint is **v3.3.0.dev1**. `SharedMolecularOperators`
+The v3.3 development milestone introduced `SharedMolecularOperators`, which
 provides real or complex Hermitian Hamiltonians and polar-vector dipoles from one
 encoder, with a common tracked electronic frame. Dipole and cross-operator losses
 preserve electronic block gauges and spatial rotations. The compact vector head
@@ -178,6 +178,39 @@ and energy/dipole training on physical LiH FCI/STO-3G paths. It is a one-molecul
 interpolation experiment, with reference data and checkpoints saved locally.
 See [the operator contract](docs/SHARED_OPERATORS.md) and
 [the benchmark and validation record](docs/V33_VALIDATION.md).
+
+## Scientific certification (v3.4.0.dev1)
+
+The current development checkpoint adds explicit finite-state scientific failure
+checks, but is **not** a validated nonadiabatic dynamics method or a completed
+molecular conical-intersection benchmark:
+
+- `certify_coupling_numerators` compares automatic derivatives to five-point
+  finite differences, optionally checked against an independently supplied
+  operator derivative, and rejects unresolved small energy-gap divisions.
+- `wilson_loop` evaluates Berry phases and non-Abelian Wilson eigenphases
+  from physical cyclic overlaps, including an explicit closing link.
+- `certify_state_truncation` diagnoses omitted electronic-state sensitivity
+  through principal angles, off-manifold residuals and spectral isolation.
+- `FCIDipoleBackend.calculate_loop` computes physical singlet FCI cross-AO
+  determinant overlap links, including direct last-to-first closure.
+  `certify_abelian_loop_convergence` checks the rank-one Berry phase across
+  refined grids; its H2 molecular control must have trivial phase.
+
+```bash
+python examples/11_berry_loop.py
+python examples/12_coupling_numerator_certification.py
+python examples/13_omitted_state_certification.py
+python -m pip install -e ".[dev,pyscf]"
+python examples/14_physical_fci_loop.py
+```
+
+See [topology](docs/V34_TOPOLOGY.md),
+[numerator checks](docs/V34_NUMERATORS.md),
+[truncation](docs/V34_TRUNCATION.md), and
+[molecular loops](docs/V34_MOLECULAR_LOOPS.md). A real polyatomic molecular
+conical-intersection reference, state-manifold completeness, and trajectory
+certification remain separate scientific gates.
 
 ## Path-aware visual diagnostics
 
@@ -227,6 +260,8 @@ thresholds behind every transition.
 - [Shared operators](docs/SHARED_OPERATORS.md): Hamiltonian/vector dipole models,
   common gauges, coupled losses, molecular references, and expressivity limits.
 - [v3.3 validation](docs/V33_VALIDATION.md): checks and held-out LiH comparisons.
+- [v3.4 certification](docs/V34_MOLECULAR_LOOPS.md): physical FCI loop closure,
+  analytic topology, coupling numerators, truncation, and phase refinement.
 - [Development roadmap](docs/ROADMAP.md): release gates from path-aware supervision
   through learned-Hamiltonian quantum benchmarks.
 - [Quantum encoding](docs/QUANTUM_ENCODING.md): finite-state encoding and its scaling.
