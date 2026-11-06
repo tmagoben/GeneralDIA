@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+- v3.4.0.dev3 adds a physical charged H3+ singlet-FCI/STO-3G
+  excited-state conical-intersection certification with explicit E-mode
+  branching geometry, direct cross-AO cyclic overlaps, local energy-gap
+  controls, independent pi Berry-phase convergence, physical nonenclosing
+  negative control, reversal, gauge covariance, and CI-archived JSON evidence.
+  This remains a finite-basis molecular topology check, not a validated
+  nonadiabatic trajectory or SOC treatment.
+
 - v3.4.0.dev2 begins the molecular CI benchmark pathway with explicitly
   charged, closed-shell singlet PySCF FCI references, consistent ionic dipole
   translation laws, and independent two-electron overlap controls for H3+.
