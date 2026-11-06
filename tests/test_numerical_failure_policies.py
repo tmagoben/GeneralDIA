@@ -213,6 +213,9 @@ def test_training_accepts_numpy_integer_reproducibility_controls():
     assert config.epochs == 2
     assert config.seed == 12
     assert config.report_every == 1
+    assert type(config.epochs) is int
+    assert type(config.seed) is int
+    assert type(config.report_every) is int
 
 
 def test_real_symmetric_packing_rejects_complex_entries_even_if_symmetric():
@@ -248,3 +251,17 @@ def test_unitary_procrustes_promotes_real_and_complex_subspace_frames():
     aligned = unitary_procrustes(reference, rotated)
     assert aligned.dtype == torch.complex128
     torch.testing.assert_close(aligned, reference.to(torch.complex128), atol=1e-13, rtol=0)
+
+
+def test_training_seed_rejects_values_outside_numpy_rng_domain():
+    with pytest.raises(ValueError, match="seed"):
+        TrainingConfig(seed=2**32)
+    upper = TrainingConfig(seed=2**32 - 1)
+    assert upper.seed == 2**32 - 1
+
+
+def test_training_canonical_seed_is_consumable_by_numpy_and_torch():
+    config = TrainingConfig(seed=np.int64(19), epochs=np.int64(1), report_every=np.int64(1))
+    np.random.seed(config.seed)
+    torch.Generator().manual_seed(config.seed)
+    assert np.random.randint(0, 1000) == 605
