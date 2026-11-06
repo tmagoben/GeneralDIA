@@ -14,20 +14,41 @@ from .observables import derivative_matrix_elements
 
 @dataclass(frozen=True)
 class LossWeights:
-    """Relative weights for quantities that may use different physical units."""
+    """Relative objective weights and fixed positive physical operator scales.
+
+    ``dipole`` and ``joint_operator`` require the path API. Their descriptors use
+    mu/dipole_scale and N/derivative_scale, so these two MSEs are dimensionless.
+    Existing energy and derivative component losses retain their original units.
+    Scales should be declared in advance or derived from training data only.
+    """
 
     energy: float = 1.0
     energy_gradient: float = 0.0
     derivative_matrix: float = 0.0
+    dipole: float = 0.0
+    joint_operator: float = 0.0
+    dipole_scale: float = 1.0
+    derivative_scale: float = 1.0
 
     def __post_init__(self) -> None:
-        values = (self.energy, self.energy_gradient, self.derivative_matrix)
+        values = (
+            self.energy,
+            self.energy_gradient,
+            self.derivative_matrix,
+            self.dipole,
+            self.joint_operator,
+        )
         if not all(isfinite(value) for value in values):
             raise ValueError("loss weights must be finite")
         if any(value < 0 for value in values):
             raise ValueError("loss weights cannot be negative")
         if not any(value > 0 for value in values):
             raise ValueError("at least one loss weight must be positive")
+        if any(
+            not isfinite(value) or value <= 0
+            for value in (self.dipole_scale, self.derivative_scale)
+        ):
+            raise ValueError("operator scales must be finite and positive")
 
 
 @dataclass
@@ -76,6 +97,8 @@ def observable_loss(
 
     if weights is None:
         weights = LossWeights()
+    if weights.dipole > 0 or weights.joint_operator > 0:
+        raise ValueError("dipole and joint-operator supervision require path_observable_loss")
     _validate_ranked_sample(sample)
     parameter = next(model.parameters(), None)
     if parameter is None:

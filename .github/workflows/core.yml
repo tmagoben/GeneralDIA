@@ -34,3 +34,4 @@ jobs:
       - run: python examples/07_qwc_measurement_grouping.py
       - run: python examples/08_path_aware_diagnostics.py
       - run: python examples/09_invariant_path_training.py
+      - run: python examples/10_shared_operators.py

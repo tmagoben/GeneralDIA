@@ -26,10 +26,11 @@ molecular-family splits, and duplicate-geometry checks. Adversarial real/complex
 tests cover permutation, phase, degenerate rotations, finite-difference gradients,
 and incorrect state continuation. See [the loss contract](PATH_INVARIANT_LOSS.md).
 
-This remains a development checkpoint pending review and the supported-platform CI
-matrix. The synthetic gates pass locally; molecular-reference validation is still
-needed before application claims. Block split/merge transitions remain fail-closed.
-The next architectural milestone is the minimal shared-operator model in v3.3.
+The v3.2 change was reviewed and merged in PR #6; its core and optional-backend
+workflows passed. The v3.3 work rechecked the merged baseline locally and adds a
+limited molecular-reference closeout using physical LiH energies, dipoles and
+adjacent overlaps. That is integration evidence, not nonadiabatic certification.
+Block split/merge transitions remain fail-closed.
 
 ## v3.3: minimal shared latent operators
 
@@ -49,6 +50,14 @@ Planned scope:
 The release gate requires exact Hermiticity, gauge-covariant operator transformations,
 deterministic checkpoints, and held-out-path results. This milestone does not require a
 large attention architecture.
+
+The v3.3.0.dev1 implementation supplies these interfaces and local checks, including
+spatially covariant neutral dipoles and cross-operator moment supervision. The
+fixed-budget molecular comparison uses held-out geometries within LiH, not unseen
+families. Derivative/dipole coupling is currently validated on synthetic references.
+See [the operator contract](SHARED_OPERATORS.md) and
+[the validation record](V33_VALIDATION.md). This remains a development milestone;
+v3.4 certification and broader molecular validation are separate gates.
 
 ## v3.4: scientific-boundary certification
 

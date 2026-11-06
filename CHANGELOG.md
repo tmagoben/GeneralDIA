@@ -2,6 +2,19 @@
 
 ## Unreleased
 
+- v3.3.0.dev1 adds `SharedMolecularOperators` with real/complex Hermitian H and
+  polar-vector dipoles, one common tracked reporting frame, dipole target transport,
+  and dimensionless dipole/cross-operator path losses. Existing H-only APIs remain.
+- Added tests for rotations/reflections/translations, complex electronic gauges,
+  exactly degenerate gradients, independent finite differences, inconsistent
+  operator phases, joint training, and exact checkpoint restoration.
+- Added a neutral all-electron singlet FCI adapter with transition dipoles and
+  cross-AO determinant overlaps, checked against finite electric fields and an
+  explicit two-electron overlap oracle. It does not supply nuclear derivatives.
+- Added a fixed-budget LiH held-out-geometry comparison against the v3.2 Hamiltonian
+  model and an energy-only shared model. Results, physical scope, architecture
+  restrictions, and the legacy derivative loss's spatial-rotation limitation are
+  documented in [the validation record](docs/V33_VALIDATION.md).
 - v3.2.0.dev2 adds independently tracked model predictions, block-invariant path
   losses, complete-path training/evaluation, family-preserving splits, and duplicate
   geometry checks. See [the path-loss contract](docs/PATH_INVARIANT_LOSS.md).

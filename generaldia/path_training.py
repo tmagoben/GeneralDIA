@@ -21,8 +21,9 @@ def evaluate_path_model(
 ) -> dict[str, float]:
     """Return means of invariant component MSEs, weighting every path equally.
 
-    Components use squared input units; these values are not elementwise matrix
-    MAEs. Coordinate derivatives require autograd even during evaluation.
+    Legacy components use squared input units; scaled dipole/joint components are
+    dimensionless. These are not elementwise matrix MAEs. Coordinate derivatives
+    require autograd even during evaluation.
     """
 
     model.eval()
