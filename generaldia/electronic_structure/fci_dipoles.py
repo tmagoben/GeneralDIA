@@ -30,8 +30,9 @@ class FCIDipoleBackend:
 
     Positions are angstrom, total energies hartree, and total molecular dipoles
     e*bohr about laboratory origin zero. Closed-shell singlet references with
-    explicitly declared integer molecular charge are admitted. State matrices use row=bra, column=ket. Cross-geometry overlaps use
-    cross-AO integrals, not raw CI coefficient dot products. This adapter computes
+    explicitly declared integer molecular charge are admitted. State matrices use
+    row=bra, column=ket. Cross-geometry overlaps use cross-AO integrals, not raw
+    CI coefficient dot products. This adapter computes
     no nuclear gradients or derivative-coupling numerators.
     """
 
