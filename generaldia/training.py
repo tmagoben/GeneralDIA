@@ -34,8 +34,12 @@ class TrainingConfig:
             or self.epochs < 1
         ):
             raise ValueError("epochs must be a positive integer")
-        if isinstance(self.seed, bool) or not isinstance(self.seed, Integral) or self.seed < 0:
-            raise ValueError("seed must be a nonnegative integer")
+        if (
+            isinstance(self.seed, bool)
+            or not isinstance(self.seed, Integral)
+            or not 0 <= self.seed <= 2**32 - 1
+        ):
+            raise ValueError("seed must be an integer in [0, 2**32 - 1]")
         if (
             isinstance(self.report_every, bool)
             or not isinstance(self.report_every, Integral)
@@ -48,6 +52,10 @@ class TrainingConfig:
             not isfinite(self.gradient_clip_norm) or self.gradient_clip_norm <= 0
         ):
             raise ValueError("gradient_clip_norm must be finite and positive or None")
+        # Normalize integral NumPy controls for Python range, torch and JSON-safe checkpoints.
+        object.__setattr__(self, "epochs", int(self.epochs))
+        object.__setattr__(self, "seed", int(self.seed))
+        object.__setattr__(self, "report_every", int(self.report_every))
 
 
 @dataclass
