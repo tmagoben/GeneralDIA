@@ -262,9 +262,13 @@ def test_training_seed_rejects_values_outside_numpy_rng_domain():
 
 def test_training_canonical_seed_is_consumable_by_numpy_and_torch():
     config = TrainingConfig(seed=np.int64(19), epochs=np.int64(1), report_every=np.int64(1))
-    np.random.seed(config.seed)
-    torch.Generator().manual_seed(config.seed)
-    assert np.random.randint(0, 1000) == 605
+    state = np.random.get_state()
+    try:
+        np.random.seed(config.seed)
+        torch.Generator().manual_seed(config.seed)
+        assert np.random.randint(0, 1000) == 605
+    finally:
+        np.random.set_state(state)
 
 
 def test_integer_real_symmetric_packing_is_promoted_to_float_for_eigensolver():
