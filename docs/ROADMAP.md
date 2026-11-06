@@ -75,6 +75,21 @@ Planned scope:
 - machine-readable certification records linking every supported claim to its test,
   tolerance, dataset provenance, and software revision.
 
+The v3.4 development branch now includes an initial analytic Berry/Wilson-loop
+slice and a fixed-basis derivative-numerator certification slice with independent
+five-point finite differences, optional operator oracles, and near-gap masks.
+See [topology](V34_TOPOLOGY.md), [numerator checks](V34_NUMERATORS.md),
+and [omitted-state sensitivity](V34_TRUNCATION.md). The third slice uses an
+explicit larger-state reference and rejects energy-only false positives with
+subspace leakage, principal-angle population and manifold-isolation tests.
+A fourth development slice adds physical closed-loop FCI overlap links through
+the direct last-to-first cross-AO determinant contraction, a rank-one Berry
+phase grid-refinement certificate, and a separate PySCF CI gate. The analytic
+CI and isospectral-trivial controls accompany an H2 molecular loop with
+expected trivial phase; H2 is **not** a molecular conical-intersection test.
+See [physical molecular loops](V34_MOLECULAR_LOOPS.md).
+These are partial development gates, not a completed v3.4 release.
+
 Passing these tests establishes only the documented finite-state and geometry-domain
 claims. It does not by itself establish trajectory or chemical accuracy.
 

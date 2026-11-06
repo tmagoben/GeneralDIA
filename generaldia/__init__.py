@@ -1,6 +1,7 @@
 """GeneralDIA public API."""
 
 from .analytic import TwoStateAvoidedCrossing
+from .certification import NumeratorCertification, certify_coupling_numerators
 from .dataset import (
     MolecularDataset,
     MolecularPath,
@@ -10,6 +11,7 @@ from .dataset import (
     TrackedMolecularPath,
     assert_disjoint_paths,
 )
+from .loop_convergence import AbelianLoopConvergence, certify_abelian_loop_convergence
 from .losses import LossWeights, observable_loss
 from .molecular import GaussianRBF, SimpleMolecularHamiltonian
 from .observables import (
@@ -34,6 +36,7 @@ from .state_tracking import (
     track_states,
     transform_state_matrices,
 )
+from .topology import LoopHolonomy, closed_loop_overlaps, wilson_loop
 from .training import (
     TrainingConfig,
     evaluate_model,
@@ -41,16 +44,20 @@ from .training import (
     save_checkpoint,
     train_model,
 )
+from .truncation import TruncationCertification, certify_state_truncation
 
 __all__ = [
+    "AbelianLoopConvergence",
     "AmbiguousStateTrackingError",
     "GaussianRBF",
+    "LoopHolonomy",
     "LossWeights",
     "MolecularDataset",
     "MolecularOperators",
     "MolecularPath",
     "MolecularPathDataset",
     "MolecularSample",
+    "NumeratorCertification",
     "PathLossBreakdown",
     "PathPrediction",
     "PathTrackingSettings",
@@ -61,11 +68,16 @@ __all__ = [
     "SubspaceMatch",
     "TrackedMolecularPath",
     "TrainingConfig",
+    "TruncationCertification",
     "TwoStateAvoidedCrossing",
     "adiabatic_energies",
     "adjacent_state_overlaps",
     "align_state_frames",
     "assert_disjoint_paths",
+    "certify_abelian_loop_convergence",
+    "certify_coupling_numerators",
+    "certify_state_truncation",
+    "closed_loop_overlaps",
     "coupling_validity_mask",
     "derivative_couplings_from_numerators",
     "derivative_matrix_elements",
@@ -83,7 +95,8 @@ __all__ = [
     "train_model",
     "train_path_model",
     "transform_state_matrices",
+    "wilson_loop",
     "write_state_tracking_report",
 ]
 
-__version__ = "3.3.0.dev1"
+__version__ = "3.4.0.dev1"

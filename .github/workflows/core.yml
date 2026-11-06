@@ -35,3 +35,21 @@ jobs:
       - run: python examples/08_path_aware_diagnostics.py
       - run: python examples/09_invariant_path_training.py
       - run: python examples/10_shared_operators.py
+      - run: python examples/11_berry_loop.py
+      - run: python examples/12_coupling_numerator_certification.py
+      - run: python examples/13_omitted_state_certification.py
+
+  molecular-loop:
+    # Physical electronic-structure validation is mandatory for this slice.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - run: python -m pip install --upgrade pip
+      - run: python -m pip install -e ".[dev,pyscf]"
+      - run: python -c "import pyscf; print('PySCF', pyscf.__version__)"
+      - run: pytest tests/test_fci_loop.py -q
+      - run: python examples/14_physical_fci_loop.py

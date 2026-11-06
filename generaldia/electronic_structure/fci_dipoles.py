@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from dataclasses import dataclass
 from math import isfinite
 
 import numpy as np
@@ -10,6 +11,18 @@ from numpy.typing import ArrayLike
 
 from ..dataset import MolecularPath, MolecularSample
 from .pyscf_backend import _atoms
+
+
+@dataclass(frozen=True)
+class FCIClosedLoop:
+    """Physical cyclic FCI overlaps and their open-chain MolecularPath.
+
+    `cyclic_overlaps[k]` is <Psi_k | Psi_(k+1) mod K> with final-to-first
+    linkage computed using the *original* first electronic wavefunctions.
+    """
+
+    path: MolecularPath
+    cyclic_overlaps: torch.Tensor
 
 
 class FCIDipoleBackend:
@@ -48,13 +61,56 @@ class FCIDipoleBackend:
         path_id: str,
         family_id: str | None = None,
     ) -> MolecularPath:
-        """Calculate a ``(K,N,3)`` scan and return a validated overlap-bearing path.
+        """Calculate an open FCI path with physical adjacent-state overlaps."""
 
-        Raises on unsupported electron counts, oversized orbital spaces, or failed
-        RHF/FCI convergence. Call ``tracked()`` to assess the selected manifold's
-        continuation; the adapter does not suppress tracking ambiguity.
+        path, _ = self._calculate_path(
+            atomic_numbers,
+            positions_angstrom,
+            path_id=path_id,
+            family_id=family_id,
+            include_closure=False,
+        )
+        return path
+
+    def calculate_loop(
+        self,
+        atomic_numbers: ArrayLike,
+        positions_angstrom: ArrayLike,
+        *,
+        path_id: str,
+        family_id: str | None = None,
+    ) -> FCIClosedLoop:
+        """Calculate a physical cyclic loop (K >= 3), including final-to-first.
+
+        All geometries share atom ordering, orbital basis specification and
+        neutral singlet FCI conventions; cross-AO integrals provide overlap
+        between different AO spaces. The returned path remains an ordinary
+        open-chain MolecularPath; only cyclic_overlaps contains the closure.
         """
+        positions = np.asarray(positions_angstrom)
+        if positions.ndim != 3 or positions.shape[0] < 3:
+            raise ValueError("closed loops require at least three molecular geometries")
+        path, cyclic = self._calculate_path(
+            atomic_numbers,
+            positions,
+            path_id=path_id,
+            family_id=family_id,
+            include_closure=True,
+        )
+        if cyclic is None:
+            raise RuntimeError("internal error: closed-loop overlaps were not produced")
+        return FCIClosedLoop(path=path, cyclic_overlaps=cyclic)
 
+    def _calculate_path(
+        self,
+        atomic_numbers: ArrayLike,
+        positions_angstrom: ArrayLike,
+        *,
+        path_id: str,
+        family_id: str | None,
+        include_closure: bool,
+    ) -> tuple[MolecularPath, torch.Tensor | None]:
+        """Calculate a scan; optionally include direct physical closure."""
         try:
             import pyscf
             from pyscf import ao2mo, fci, gto, scf
@@ -99,6 +155,7 @@ class FCIDipoleBackend:
                 raise ValueError("family_id must be a non-empty string")
             metadata["molecular_family"] = family_id
         samples, overlaps, previous = [], [], None
+        first_frame = None
         for coordinates in positions:
             mol = gto.M(
                 atom=_atoms(numbers, coordinates),
@@ -143,6 +200,8 @@ class FCIDipoleBackend:
                     dipoles[:, bra, ket] = -np.einsum("xpq,qp->x", integrals, density)
                     if bra == ket:
                         dipoles[:, bra, ket] += nuclear
+            if first_frame is None:
+                first_frame = (mol, mo, roots)
             if previous is not None:
                 prior_mol, prior_mo, prior_roots = previous
                 orbital_overlap = prior_mo.T @ gto.intor_cross("int1e_ovlp", prior_mol, mol) @ mo
@@ -167,9 +226,33 @@ class FCIDipoleBackend:
                     dipole_matrix_elements=torch.from_numpy(dipoles),
                 )
             )
-        return MolecularPath(
+        path = MolecularPath(
             samples,
             path_id=path_id,
             adjacent_overlaps=torch.from_numpy(np.stack(overlaps)),
             metadata=metadata,
         )
+        if not include_closure:
+            return path, None
+        if first_frame is None or previous is None:
+            raise RuntimeError("cannot close an empty electronic-state path")
+        first_mol, first_mo, first_roots = first_frame
+        last_mol, last_mo, last_roots = previous
+        closing_orbital_overlap = (
+            last_mo.T @ gto.intor_cross("int1e_ovlp", last_mol, first_mol) @ first_mo
+        )
+        closing = np.asarray(
+            [
+                [
+                    fci.addons.overlap(
+                        bra, ket, last_mo.shape[1], last_mol.nelec, s=closing_orbital_overlap
+                    )
+                    for ket in first_roots
+                ]
+                for bra in last_roots
+            ]
+        )
+        if not np.isfinite(closing).all():
+            raise ValueError("physical closing overlap contains nonfinite values")
+        cyclic = torch.from_numpy(np.concatenate((np.stack(overlaps), closing[None]), axis=0))
+        return path, cyclic
