@@ -38,9 +38,7 @@ def test_closed_loop_uses_direct_physical_endpoint_link():
     assert len(path) == 4
     assert loop.cyclic_overlaps.shape == (4, 1, 1)
     torch.testing.assert_close(loop.cyclic_overlaps[:-1], path.adjacent_overlaps)
-    independent = backend.calculate_path(
-        [1, 1], positions[[-1, 0]], path_id="h2-reverse-edge"
-    )
+    independent = backend.calculate_path([1, 1], positions[[-1, 0]], path_id="h2-reverse-edge")
     # Independently solved electronic roots may differ by a real sign.
     torch.testing.assert_close(
         loop.cyclic_overlaps[-1].abs(),
