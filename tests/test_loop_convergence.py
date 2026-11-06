@@ -19,9 +19,10 @@ def _loop(n, *, crossing=True, gauge=False):
     _, eigenvectors = torch.linalg.eigh(h)
     frame = eigenvectors[:, :, :1]
     if gauge:
-        frame = frame.to(torch.complex128) * torch.exp(
-            1j * (0.8 * phase + torch.sin(3 * phase))
-        )[:, None, None]
+        frame = (
+            frame.to(torch.complex128)
+            * torch.exp(1j * (0.8 * phase + torch.sin(3 * phase)))[:, None, None]
+        )
     return n, closed_loop_overlaps(frame)
 
 
