@@ -2,9 +2,16 @@
 
 import math
 
+import numpy as np
 import pytest
+import torch
 
-from generaldia.electronic_structure.h3plus_ci import certify_h3plus_molecular_ci
+from generaldia.electronic_structure.fci_dipoles import FCIDipoleBackend
+from generaldia.electronic_structure.h3plus_ci import (
+    certify_h3plus_molecular_ci,
+    h3plus_ci_loop,
+)
+from generaldia.topology import wilson_loop
 
 pytestmark = pytest.mark.optional
 
@@ -53,3 +60,33 @@ def test_molecular_h3plus_excited_ci_has_converged_physical_pi_holonomy():
 def test_invalid_ci_benchmark_settings_fail_before_pyscf_calculation(settings):
     with pytest.raises(ValueError):
         certify_h3plus_molecular_ci(**settings)
+
+
+def test_molecular_ci_is_stable_at_second_bond_and_loop_radius():
+    evidence = certify_h3plus_molecular_ci(
+        bond_angstrom=0.90,
+        radius_angstrom=0.045,
+        refinement_points=(8, 12, 16),
+    )
+    assert evidence.passed, evidence.checks
+    assert evidence.min_ground_isolation_hartree > 1e-3
+    assert evidence.min_upper_isolation_hartree > 1e-3
+    assert abs(abs(evidence.lower_excited_loop.phases[-1]) - math.pi) < 0.06
+
+
+def test_atom_relabeling_preserves_molecular_energies_and_holonomy():
+    backend = FCIDipoleBackend(charge=1, n_states=4, conv_tol=1e-11)
+    geometry = h3plus_ci_loop(16, 0.06)
+    ordinary = backend.calculate_loop([1, 1, 1], geometry, path_id="h3plus-ordered")
+    permuted = backend.calculate_loop(
+        [1, 1, 1], geometry[:, [2, 0, 1], :], path_id="h3plus-permuted"
+    )
+    torch.testing.assert_close(
+        ordinary.path.energies, permuted.path.energies, atol=1e-9, rtol=1e-9
+    )
+    for state in (1, 2):
+        selector = np.s_[:, state : state + 1, state : state + 1]
+        phase_a = wilson_loop(ordinary.cyclic_overlaps[selector]).berry_phase
+        phase_b = wilson_loop(permuted.cyclic_overlaps[selector]).berry_phase
+        distance = abs(math.atan2(math.sin(phase_a - phase_b), math.cos(phase_a - phase_b)))
+        assert distance < 1e-9
