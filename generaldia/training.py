@@ -28,7 +28,11 @@ class TrainingConfig:
     report_every: int = 25
 
     def __post_init__(self) -> None:
-        if isinstance(self.epochs, bool) or not isinstance(self.epochs, Integral) or self.epochs < 1:
+        if (
+            isinstance(self.epochs, bool)
+            or not isinstance(self.epochs, Integral)
+            or self.epochs < 1
+        ):
             raise ValueError("epochs must be a positive integer")
         if isinstance(self.seed, bool) or not isinstance(self.seed, Integral) or self.seed < 0:
             raise ValueError("seed must be a nonnegative integer")
