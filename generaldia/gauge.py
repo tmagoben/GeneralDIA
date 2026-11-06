@@ -17,6 +17,13 @@ def align_phase(reference: Tensor, candidate: Tensor, *, overlap_floor: float = 
 
     reference = torch.as_tensor(reference)
     candidate = torch.as_tensor(candidate, device=reference.device)
+    if not (reference.is_floating_point() or reference.is_complex()):
+        reference = reference.to(torch.get_default_dtype())
+    if not (candidate.is_floating_point() or candidate.is_complex()):
+        candidate = candidate.to(torch.get_default_dtype())
+    common_dtype = torch.promote_types(reference.dtype, candidate.dtype)
+    reference = reference.to(common_dtype)
+    candidate = candidate.to(common_dtype)
     if reference.shape != candidate.shape or reference.ndim != 1:
         raise ValueError("reference and candidate must be vectors with matching shapes")
     if not isfinite(overlap_floor) or not 0 <= overlap_floor < 1:
@@ -64,6 +71,13 @@ def unitary_procrustes(reference: Tensor, candidate: Tensor) -> Tensor:
 
     reference = torch.as_tensor(reference)
     candidate = torch.as_tensor(candidate, device=reference.device)
+    if not (reference.is_floating_point() or reference.is_complex()):
+        reference = reference.to(torch.get_default_dtype())
+    if not (candidate.is_floating_point() or candidate.is_complex()):
+        candidate = candidate.to(torch.get_default_dtype())
+    common_dtype = torch.promote_types(reference.dtype, candidate.dtype)
+    reference = reference.to(common_dtype)
+    candidate = candidate.to(common_dtype)
     if reference.shape != candidate.shape or reference.ndim != 2:
         raise ValueError("reference and candidate must be matrices with matching shapes")
     projector(reference)
