@@ -70,17 +70,12 @@ def certify_abelian_loop_convergence(
             raise ValueError("point counts must be strictly increasing")
         if overlaps.ndim != 3 or overlaps.shape != (count, 1, 1):
             raise ValueError("rank-one cyclic overlaps must have shape (count, 1, 1)")
-        result = wilson_loop(
-            overlaps, minimum_link_singular_value=minimum_link_singular_value
-        )
+        result = wilson_loop(overlaps, minimum_link_singular_value=minimum_link_singular_value)
         counts.append(count)
         phases.append(result.berry_phase)
         link_floors.append(result.minimum_link_singular_value)
 
-    successive = tuple(
-        _circular_distance(phases[i], phases[i + 1])
-        for i in range(len(phases) - 1)
-    )
+    successive = tuple(_circular_distance(phases[i], phases[i + 1]) for i in range(len(phases) - 1))
     coarse_to_finest = max(_circular_distance(p, phases[-1]) for p in phases[:-1])
     reference_error = (
         None if reference_phase is None else _circular_distance(phases[-1], reference_phase)
