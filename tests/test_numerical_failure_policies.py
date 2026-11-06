@@ -171,3 +171,45 @@ def test_pauli_decomposition_matches_exact_nontrivial_hermitian_matrix():
         np.linalg.eigvalsh(source)[0],
         abs_tol=1e-13,
     )
+
+
+def test_analytic_reference_uses_stable_hypot_for_extreme_finite_coordinates():
+    model = TwoStateAvoidedCrossing(slope=0.09, coupling=0.015)
+    coordinates = torch.tensor([-1e200, 1e200], dtype=torch.float64)
+    energies = model.exact_energies(coordinates)
+    assert torch.isfinite(energies).all()
+    torch.testing.assert_close(
+        energies[:, 1],
+        torch.full((2,), 0.09e200, dtype=torch.float64),
+        rtol=1e-14,
+        atol=0,
+    )
+
+
+def test_analytic_reference_fails_closed_on_genuine_floating_point_overflow():
+    model = TwoStateAvoidedCrossing(slope=1e200, coupling=1.0)
+    with pytest.raises(ValueError, match="overflowed"):
+        model.exact_energies(torch.tensor([1e200], dtype=torch.float64))
+
+
+@pytest.mark.parametrize(
+    "kwargs, message",
+    [
+        ({"epochs": 1.5}, "epochs"),
+        ({"epochs": True}, "epochs"),
+        ({"seed": -1}, "seed"),
+        ({"seed": 1.1}, "seed"),
+        ({"report_every": 1.5}, "report_every"),
+        ({"report_every": True}, "report_every"),
+    ],
+)
+def test_training_rejects_invalid_integer_controls(kwargs, message):
+    with pytest.raises(ValueError, match=message):
+        TrainingConfig(**kwargs)
+
+
+def test_training_accepts_numpy_integer_reproducibility_controls():
+    config = TrainingConfig(epochs=np.int64(2), seed=np.int64(12), report_every=np.int64(1))
+    assert config.epochs == 2
+    assert config.seed == 12
+    assert config.report_every == 1
