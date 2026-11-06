@@ -173,9 +173,7 @@ def certify_h3plus_molecular_ci(
     minimum_links = []
     for n in refinement_points:
         geometry = h3plus_ci_loop(n, radius_angstrom, bond_angstrom=bond_angstrom)
-        loop = backend.calculate_loop(
-            ATOMIC_NUMBERS, geometry, path_id=f"h3plus-ci-encircle-{n}"
-        )
+        loop = backend.calculate_loop(ATOMIC_NUMBERS, geometry, path_id=f"h3plus-ci-encircle-{n}")
         circular.append(loop)
         digests[f"encircling_{n}"] = sha256(geometry.tobytes()).hexdigest()
         for state, levels in ((1, lower_levels), (2, upper_levels)):
@@ -214,9 +212,7 @@ def certify_h3plus_molecular_ci(
     minimum_links.append(no_ci.minimum_link_singular_value)
 
     # Reverse order is recalculated, not formed by editing an overlap product.
-    reverse_geo = h3plus_ci_loop(
-        n, radius_angstrom, bond_angstrom=bond_angstrom, orientation=-1
-    )
+    reverse_geo = h3plus_ci_loop(n, radius_angstrom, bond_angstrom=bond_angstrom, orientation=-1)
     reverse = backend.calculate_loop(ATOMIC_NUMBERS, reverse_geo, path_id="h3plus-reverse")
     digests["reversed"] = sha256(reverse_geo.tobytes()).hexdigest()
     reversed_phase = wilson_loop(
@@ -228,9 +224,11 @@ def certify_h3plus_molecular_ci(
     chosen = circular[-1].cyclic_overlaps[:, 1:2, 1:2].to(torch.complex128)
     index = torch.arange(n, dtype=torch.float64)
     local_gauge = torch.exp(1j * (0.2 * index + torch.sin(1.7 * index)))
-    gauged = chosen * local_gauge.conj()[:, None, None] * torch.roll(
-        local_gauge, shifts=-1
-    )[:, None, None]
+    gauged = (
+        chosen
+        * local_gauge.conj()[:, None, None]
+        * torch.roll(local_gauge, shifts=-1)[:, None, None]
+    )
     phase_invariant = wilson_loop(gauged, minimum_link_singular_value=link_floor)
     gauge_error = _distance(phase_invariant.berry_phase, lower.phases[-1])
 
@@ -241,9 +239,7 @@ def certify_h3plus_molecular_ci(
 
     checks = {
         "equilateral_excited_degeneracy": abs(central_gap) <= 1e-6,
-        "two_independent_linear_branching_directions": all(
-            1.3 < ratio < 2.7 for ratio in ratios
-        ),
+        "two_independent_linear_branching_directions": all(1.3 < ratio < 2.7 for ratio in ratios),
         "ground_and_higher_root_isolation": (
             min(ground_isolation) > 1e-3 and min(upper_isolation) > 1e-3
         ),
@@ -255,8 +251,7 @@ def certify_h3plus_molecular_ci(
         < phase_tolerance,
         "local_complex_gauge_covariance": gauge_error < 1e-9,
         "energy_only_control_rejected": (
-            _distance(trivial.berry_phase, 0) < 1e-12
-            and _distance(trivial.berry_phase, pi) > 3.0
+            _distance(trivial.berry_phase, 0) < 1e-12 and _distance(trivial.berry_phase, pi) > 3.0
         ),
     }
     return H3PlusCIEvidence(
