@@ -213,3 +213,17 @@ def test_training_accepts_numpy_integer_reproducibility_controls():
     assert config.epochs == 2
     assert config.seed == 12
     assert config.report_every == 1
+
+
+def test_real_symmetric_packing_rejects_complex_entries_even_if_symmetric():
+    with pytest.raises(ValueError, match="real values"):
+        unpack_real_symmetric(
+            torch.tensor([1.0 + 0j, 0.0 + 1.0j, 2.0 + 0j], dtype=torch.complex128),
+            2,
+        )
+
+
+def test_analytic_hamiltonian_rejects_overflow_instead_of_returning_infinite_matrix():
+    model = TwoStateAvoidedCrossing(slope=1e200, coupling=1.0)
+    with pytest.raises(ValueError, match="overflowed"):
+        model.hamiltonian(torch.tensor([1e200], dtype=torch.float64))
