@@ -13,7 +13,7 @@ import torch
 
 from generaldia.analytic import TwoStateAvoidedCrossing
 from generaldia.dataset import MolecularDataset, MolecularSample
-from generaldia.gauge import align_phase
+from generaldia.gauge import align_phase, unitary_procrustes
 from generaldia.matrix import complex_hermitian_from_parts, unpack_real_symmetric
 from generaldia.quantum.pauli import matrix_to_pauli, pauli_to_matrix
 from generaldia.training import TrainingConfig
@@ -227,3 +227,24 @@ def test_analytic_hamiltonian_rejects_overflow_instead_of_returning_infinite_mat
     model = TwoStateAvoidedCrossing(slope=1e200, coupling=1.0)
     with pytest.raises(ValueError, match="overflowed"):
         model.hamiltonian(torch.tensor([1e200], dtype=torch.float64))
+
+
+def test_phase_alignment_promotes_real_reference_to_complex_without_losing_phase():
+    reference = torch.tensor([0.6, -0.8], dtype=torch.float64)
+    candidate = reference.to(torch.complex128) * torch.exp(
+        torch.tensor(0.51j, dtype=torch.complex128)
+    )
+    aligned = align_phase(reference, candidate)
+    assert aligned.dtype == torch.complex128
+    torch.testing.assert_close(aligned, reference.to(torch.complex128), atol=1e-13, rtol=0)
+
+
+def test_unitary_procrustes_promotes_real_and_complex_subspace_frames():
+    reference = torch.eye(3, dtype=torch.float64)[:, :2]
+    phases = torch.diag(
+        torch.exp(torch.tensor([0.3j, -0.2j], dtype=torch.complex128))
+    )
+    rotated = reference.to(torch.complex128) @ phases
+    aligned = unitary_procrustes(reference, rotated)
+    assert aligned.dtype == torch.complex128
+    torch.testing.assert_close(aligned, reference.to(torch.complex128), atol=1e-13, rtol=0)
