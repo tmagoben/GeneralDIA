@@ -4,15 +4,15 @@ on:
   workflow_dispatch:
   schedule:
     - cron: "17 6 * * 1"
+  push:
+    branches: [master]
   pull_request:
     paths:
-      - "generaldia/quantum/**"
-      - "generaldia/electronic_structure/**"
-      - "examples/quantum/**"
-      - "examples/pyscf/**"
-      - "tests/test_fci_dipoles.py"
-      - "tests/test_electronic_structure.py"
+      - "generaldia/**"
+      - "examples/**"
+      - "tests/**"
       - "pyproject.toml"
+      - ".github/workflows/optional-backends.yml"
 
 jobs:
   quantum:
@@ -48,6 +48,6 @@ jobs:
         with:
           name: coverage-scientific-pyscf
           path: coverage-pyscf.xml
-          if-no-files-found: warn
+          if-no-files-found: error
       - run: python examples/pyscf/01_h2_rhf.py
       - run: python examples/pyscf/03_lih_shared_operators.py
