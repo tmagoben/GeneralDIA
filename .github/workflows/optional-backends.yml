@@ -38,6 +38,6 @@ jobs:
           python-version: "3.11"
           cache: pip
       - run: python -m pip install -e ".[dev,pyscf]"
-      - run: pytest tests/test_electronic_structure.py tests/test_fci_dipoles.py tests/test_fci_charged.py
+      - run: pytest tests/test_electronic_structure.py tests/test_fci_dipoles.py tests/test_fci_charged.py tests/test_h3plus_ci.py
       - run: python examples/pyscf/01_h2_rhf.py
       - run: python examples/pyscf/03_lih_shared_operators.py
