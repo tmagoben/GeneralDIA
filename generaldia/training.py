@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 from dataclasses import asdict, dataclass
+from math import isfinite
+from numbers import Integral
 from pathlib import Path
 from typing import Any
 
@@ -26,14 +28,34 @@ class TrainingConfig:
     report_every: int = 25
 
     def __post_init__(self) -> None:
-        if self.epochs < 1:
-            raise ValueError("epochs must be positive")
-        if self.learning_rate <= 0:
-            raise ValueError("learning_rate must be positive")
-        if self.gradient_clip_norm is not None and self.gradient_clip_norm <= 0:
-            raise ValueError("gradient_clip_norm must be positive or None")
-        if self.report_every < 1:
-            raise ValueError("report_every must be positive")
+        if (
+            isinstance(self.epochs, bool)
+            or not isinstance(self.epochs, Integral)
+            or self.epochs < 1
+        ):
+            raise ValueError("epochs must be a positive integer")
+        if (
+            isinstance(self.seed, bool)
+            or not isinstance(self.seed, Integral)
+            or not 0 <= self.seed <= 2**32 - 1
+        ):
+            raise ValueError("seed must be an integer in [0, 2**32 - 1]")
+        if (
+            isinstance(self.report_every, bool)
+            or not isinstance(self.report_every, Integral)
+            or self.report_every < 1
+        ):
+            raise ValueError("report_every must be a positive integer")
+        if not isfinite(self.learning_rate) or self.learning_rate <= 0:
+            raise ValueError("learning_rate must be finite and positive")
+        if self.gradient_clip_norm is not None and (
+            not isfinite(self.gradient_clip_norm) or self.gradient_clip_norm <= 0
+        ):
+            raise ValueError("gradient_clip_norm must be finite and positive or None")
+        # Normalize integral NumPy controls for Python range, torch and JSON-safe checkpoints.
+        object.__setattr__(self, "epochs", int(self.epochs))
+        object.__setattr__(self, "seed", int(self.seed))
+        object.__setattr__(self, "report_every", int(self.report_every))
 
 
 @dataclass

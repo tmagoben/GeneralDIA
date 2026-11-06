@@ -221,6 +221,21 @@ count, orbital overlap and the ionic total-dipole translation law. They do
 [charged singlet references](docs/V34_CHARGED_FCI.md) and
 [the next physical CI milestone](https://github.com/tmagoben/GeneralDIA/issues/9).
 
+## Numerical reliability hardening (v3.4.0.dev4)
+
+The current development checkpoint strengthens finite-value and state-dimension
+checks, preserves complex electronic phases when aligning mixed real/complex
+frames, and rejects undefined gauges rather than inventing reference results.
+Safe numerical formulas use `hypot` for analytic two-state eigenvalues and
+scale positive dataset split weights before normalization to avoid intermediate
+overflow. Model-training seeds are explicitly bounded and normalized for both
+NumPy and PyTorch. The molecular H3+ CI benchmark and its physical checks are
+retained without weaker tolerances.
+
+See [numerical failure and fallback policy](docs/NUMERICAL_FAILURE_POLICY.md)
+and [coverage policy](docs/COVERAGE_POLICY.md). The full PySCF suite has a
+separate mandatory coverage gate from the dependency-light core suite.
+
 ## Physical H3+ conical-intersection benchmark (v3.4.0.dev3)
 
 The current branch computes **actual molecular** FCI wavefunctions around the
@@ -294,6 +309,10 @@ thresholds behind every transition.
   through learned-Hamiltonian quantum benchmarks.
 - [Quantum encoding](docs/QUANTUM_ENCODING.md): finite-state encoding and its scaling.
 - [Reproducibility](docs/REPRODUCIBILITY.md): records required for a repeatable experiment.
+- [Coverage policy](docs/COVERAGE_POLICY.md): separate core-only and PySCF-installed
+  scientific suite measurement, thresholds, source scope and remaining gaps.
+- [Numerical failure policy](docs/NUMERICAL_FAILURE_POLICY.md): stable calculations,
+  declared fallbacks and fail-closed scientific error handling.
 - [Limitations](docs/LIMITATIONS.md): current model and backend constraints.
 
 ## Development checks
@@ -307,7 +326,9 @@ python examples/06_state_tracking.py
 ```
 
 GitHub Actions runs the core suite across supported Python versions and one Windows
-job. Separate scheduled jobs exercise PySCF, PennyLane, and Qiskit.
+job. A separate complete PySCF-installed test run enforces the stronger full-science
+coverage threshold and archives its XML report; optional quantum integrations
+have independent tests. See the [coverage policy](docs/COVERAGE_POLICY.md).
 
 ## License
 

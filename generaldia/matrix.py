@@ -2,15 +2,16 @@
 
 from __future__ import annotations
 
+from numbers import Integral
+
 import torch
 from torch import Tensor
 
 
 def _positive_integer(value: int, name: str) -> int:
-    value = int(value)
-    if value < 1:
+    if isinstance(value, bool) or not isinstance(value, Integral) or value < 1:
         raise ValueError(f"{name} must be a positive integer")
-    return value
+    return int(value)
 
 
 def unpack_real_symmetric(packed: Tensor, n: int) -> Tensor:
@@ -24,9 +25,15 @@ def unpack_real_symmetric(packed: Tensor, n: int) -> Tensor:
     packed = torch.as_tensor(packed)
     if packed.ndim < 1:
         raise ValueError("packed must have at least one dimension")
+    if packed.is_complex():
+        raise ValueError("packed must contain real values")
     expected = n * (n + 1) // 2
     if packed.shape[-1] != expected:
         raise ValueError(f"packed has {packed.shape[-1]} values; expected {expected} for n={n}")
+    if not torch.isfinite(packed).all():
+        raise ValueError("packed matrix entries must be finite")
+    if not packed.is_floating_point():
+        packed = packed.to(torch.get_default_dtype())
 
     rows, cols = torch.triu_indices(n, n, device=packed.device)
     matrix = packed.new_zeros((*packed.shape[:-1], n, n))
@@ -55,6 +62,8 @@ def complex_hermitian_from_parts(
         raise ValueError("diagonal must be real")
     if not diagonal.is_floating_point():
         diagonal = diagonal.to(torch.get_default_dtype())
+    if not torch.isfinite(diagonal).all():
+        raise ValueError("diagonal must contain finite values")
 
     n = diagonal.shape[-1]
     expected = n * (n - 1) // 2
@@ -66,10 +75,16 @@ def complex_hermitian_from_parts(
         )
     if real_upper.is_complex() or imag_upper.is_complex():
         raise ValueError("off-diagonal component tensors must be real")
+    if not torch.isfinite(real_upper).all() or not torch.isfinite(imag_upper).all():
+        raise ValueError("off-diagonal component tensors must contain finite values")
 
-    real_upper = real_upper.to(dtype=diagonal.dtype)
-    imag_upper = imag_upper.to(dtype=diagonal.dtype)
-    complex_dtype = torch.complex128 if diagonal.dtype == torch.float64 else torch.complex64
+    # Preserve the most precise real component before constructing complex values.
+    real_dtype = torch.promote_types(diagonal.dtype, real_upper.dtype)
+    real_dtype = torch.promote_types(real_dtype, imag_upper.dtype)
+    diagonal = diagonal.to(dtype=real_dtype)
+    real_upper = real_upper.to(dtype=real_dtype)
+    imag_upper = imag_upper.to(dtype=real_dtype)
+    complex_dtype = torch.complex128 if real_dtype == torch.float64 else torch.complex64
     matrix = torch.zeros(
         (*diagonal.shape[:-1], n, n),
         dtype=complex_dtype,

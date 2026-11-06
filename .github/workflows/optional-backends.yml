@@ -1,18 +1,22 @@
 name: optional-backends
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 on:
   workflow_dispatch:
   schedule:
     - cron: "17 6 * * 1"
+  push:
+    branches: [master]
   pull_request:
     paths:
-      - "generaldia/quantum/**"
-      - "generaldia/electronic_structure/**"
-      - "examples/quantum/**"
-      - "examples/pyscf/**"
-      - "tests/test_fci_dipoles.py"
-      - "tests/test_electronic_structure.py"
+      - "generaldia/**"
+      - "examples/**"
+      - "tests/**"
       - "pyproject.toml"
+      - ".github/workflows/optional-backends.yml"
 
 jobs:
   quantum:
@@ -38,6 +42,16 @@ jobs:
           python-version: "3.11"
           cache: pip
       - run: python -m pip install -e ".[dev,pyscf]"
-      - run: pytest tests/test_electronic_structure.py tests/test_fci_dipoles.py tests/test_fci_charged.py tests/test_h3plus_ci.py
+      - name: Run complete PySCF-installed suite with scientific coverage gate
+        run: >
+          pytest --cov=generaldia --cov-report=term-missing
+          --cov-report=xml:coverage-pyscf.xml --cov-fail-under=92
+      - name: Archive full scientific coverage report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-scientific-pyscf
+          path: coverage-pyscf.xml
+          if-no-files-found: error
       - run: python examples/pyscf/01_h2_rhf.py
       - run: python examples/pyscf/03_lih_shared_operators.py

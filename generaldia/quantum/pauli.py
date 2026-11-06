@@ -39,8 +39,8 @@ def _n_qubits(dimension: int) -> int:
 def matrix_to_pauli(hamiltonian: ArrayLike, tol: float = 1e-12) -> dict[str, complex]:
     """Expand a power-of-two Hermitian matrix in the complete Pauli basis."""
 
-    if tol < 0:
-        raise ValueError("tol cannot be negative")
+    if not math.isfinite(tol) or tol < 0:
+        raise ValueError("tol must be finite and nonnegative")
     hamiltonian = np.asarray(hamiltonian, dtype=np.complex128)
     if hamiltonian.ndim != 2 or hamiltonian.shape[0] != hamiltonian.shape[1]:
         raise ValueError("hamiltonian must be square")
