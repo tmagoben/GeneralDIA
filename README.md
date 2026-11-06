@@ -181,7 +181,7 @@ See [the operator contract](docs/SHARED_OPERATORS.md) and
 
 ## Scientific certification (v3.4.0.dev1)
 
-The current development checkpoint adds explicit finite-state scientific failure
+The v3.4.0.dev1 checkpoint added explicit finite-state scientific failure
 checks, but is **not** a validated nonadiabatic dynamics method or a completed
 molecular conical-intersection benchmark:
 
@@ -211,6 +211,15 @@ See [topology](docs/V34_TOPOLOGY.md),
 [molecular loops](docs/V34_MOLECULAR_LOOPS.md). A real polyatomic molecular
 conical-intersection reference, state-manifold completeness, and trajectory
 certification remain separate scientific gates.
+
+## Charged molecular reference development (v3.4.0.dev2)
+
+The current development branch extends the optional singlet-FCI PySCF reference
+adapter with explicit molecular charge. Its H3+ tests check charge/electron
+count, orbital overlap and the ionic total-dipole translation law. They do
+**not** yet establish a molecular conical-intersection Berry phase. See
+[charged singlet references](docs/V34_CHARGED_FCI.md) and
+[the next physical CI milestone](https://github.com/tmagoben/GeneralDIA/issues/9).
 
 ## Path-aware visual diagnostics
 

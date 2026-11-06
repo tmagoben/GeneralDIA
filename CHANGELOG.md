@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- v3.4.0.dev2 begins the molecular CI benchmark pathway with explicitly
+  charged, closed-shell singlet PySCF FCI references, consistent ionic dipole
+  translation laws, and independent two-electron overlap controls for H3+.
+  This is infrastructure, not a demonstrated molecular conical intersection.
+
 - v3.4.0.dev1 introduces finite-state certification for Berry/Wilson topology,
   independent Hamiltonian derivative-coupling numerators, and omitted-state
   sensitivity with explicit near-gap and truncated-manifold rejection controls.
