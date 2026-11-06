@@ -128,11 +128,11 @@ def test_dataset_split_rejects_nonfinite_probabilities(fractions):
         dataset.split(fractions)
 
 
-def test_dataset_split_rejects_overflowing_probability_sum():
+def test_dataset_split_stably_normalizes_large_finite_weights():
     sample = MolecularSample([1, 1], torch.zeros(2, 3), [0.0, 1.0])
     dataset = MolecularDataset([sample, sample, sample])
-    with pytest.raises(ValueError, match="finite positive sum"):
-        dataset.split((1e308, 1e308, 1e308))
+    partitions = dataset.split((1e308, 1e308, 1e308), seed=7)
+    assert tuple(len(split) for split in partitions) == (1, 1, 1)
 
 
 @pytest.mark.parametrize(
