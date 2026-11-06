@@ -192,9 +192,11 @@ class MolecularDataset(Sequence[MolecularSample]):
 
         if len(self) < 3:
             raise ValueError("a three-way split requires at least three samples")
-        if len(fractions) != 3 or any(value <= 0 for value in fractions):
-            raise ValueError("fractions must contain three positive values")
+        if len(fractions) != 3 or any(not np.isfinite(value) or value <= 0 for value in fractions):
+            raise ValueError("fractions must contain three positive finite values")
         total = sum(fractions)
+        if not np.isfinite(total) or total <= 0:
+            raise ValueError("fractions must have a finite positive sum")
         normalized = tuple(value / total for value in fractions)
         train_count = max(1, int(np.floor(normalized[0] * len(self))))
         validation_count = max(1, int(np.floor(normalized[1] * len(self))))
