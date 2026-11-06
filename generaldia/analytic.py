@@ -36,6 +36,8 @@ class TwoStateAvoidedCrossing:
         matrix[..., 1, 1] = -self.slope * coordinate
         matrix[..., 0, 1] = self.coupling
         matrix[..., 1, 0] = self.coupling
+        if not torch.isfinite(matrix).all():
+            raise ValueError("analytic Hamiltonian entries overflowed finite floating-point range")
         return matrix
 
     def exact_energies(self, coordinate: Tensor | float) -> Tensor:
