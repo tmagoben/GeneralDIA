@@ -44,6 +44,8 @@ class TwoStateAvoidedCrossing:
         """Return analytic eigenvalues in ascending order."""
 
         coordinate = torch.as_tensor(coordinate)
+        if coordinate.is_complex():
+            raise ValueError("coordinate must be real")
         if not coordinate.is_floating_point():
             coordinate = coordinate.to(torch.get_default_dtype())
         if not torch.isfinite(coordinate).all():
