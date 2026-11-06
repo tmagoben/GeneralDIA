@@ -1,4 +1,4 @@
-"""Small neutral singlet FCI paths with physical overlaps and dipoles from PySCF."""
+"""Small closed-shell singlet FCI paths with physical overlaps and dipoles from PySCF."""
 
 from __future__ import annotations
 
@@ -29,8 +29,8 @@ class FCIDipoleBackend:
     """All-electron singlet FCI in a small orbital basis; no frozen-core approximation.
 
     Positions are angstrom, total energies hartree, and total molecular dipoles
-    e*bohr about laboratory origin zero. Only neutral closed-shell references are
-    admitted. State matrices use row=bra, column=ket. Cross-geometry overlaps use
+    e*bohr about laboratory origin zero. Closed-shell singlet references with
+    explicitly declared integer molecular charge are admitted. State matrices use row=bra, column=ket. Cross-geometry overlaps use
     cross-AO integrals, not raw CI coefficient dot products. This adapter computes
     no nuclear gradients or derivative-coupling numerators.
     """
@@ -41,6 +41,7 @@ class FCIDipoleBackend:
         n_states: int = 2,
         conv_tol: float = 1e-10,
         max_orbitals: int = 8,
+        charge: int = 0,
     ) -> None:
         if not isinstance(basis, str) or not basis.strip():
             raise ValueError("basis must be a non-empty string")
@@ -50,8 +51,11 @@ class FCIDipoleBackend:
             raise ValueError("conv_tol must be finite and positive")
         if isinstance(max_orbitals, bool) or int(max_orbitals) != max_orbitals or max_orbitals < 1:
             raise ValueError("max_orbitals must be a positive integer")
+        if isinstance(charge, bool) or not isinstance(charge, (int, np.integer)):
+            raise ValueError("charge must be an integer")
         self.basis, self.n_states = basis, int(n_states)
         self.conv_tol, self.max_orbitals = float(conv_tol), int(max_orbitals)
+        self.charge = int(charge)
 
     def calculate_path(
         self,
@@ -126,8 +130,9 @@ class FCIDipoleBackend:
             or np.any(numbers != numbers.astype(int))
         ):
             raise ValueError("atomic_numbers must contain at least two positive integers")
-        if int(numbers.sum()) % 2:
-            raise ValueError("the neutral singlet adapter requires an even electron count")
+        electrons = int(numbers.sum()) - self.charge
+        if electrons < 2 or electrons % 2:
+            raise ValueError("closed-shell singlet FCI requires a positive even electron count")
         if (
             positions.ndim != 3
             or positions.shape[0] < 2
@@ -139,7 +144,7 @@ class FCIDipoleBackend:
             "backend_version": pyscf.__version__,
             "method": "all-electron singlet FCI",
             "basis": self.basis,
-            "charge": 0,
+            "charge": self.charge,
             "spin": 0,
             "n_states": self.n_states,
             "conv_tol": self.conv_tol,
@@ -147,6 +152,7 @@ class FCIDipoleBackend:
             "energy_unit": "hartree",
             "dipole_unit": "e*bohr",
             "dipole_origin_bohr": [0.0, 0.0, 0.0],
+            "dipole_translation_law": "mu(R+delta) = mu(R) + charge*delta_bohr*I",
             "state_matrix_convention": "row=bra,column=ket",
             "overlap_method": "FCI determinant overlaps using cross-AO integrals",
         }
@@ -161,7 +167,7 @@ class FCIDipoleBackend:
                 atom=_atoms(numbers, coordinates),
                 basis=self.basis,
                 unit="Angstrom",
-                charge=0,
+                charge=self.charge,
                 spin=0,
                 verbose=0,
             )
