@@ -296,6 +296,8 @@ thresholds behind every transition.
 - [Reproducibility](docs/REPRODUCIBILITY.md): records required for a repeatable experiment.
 - [Coverage policy](docs/COVERAGE_POLICY.md): separate core-only and PySCF-installed
   scientific suite measurement, thresholds, source scope and remaining gaps.
+- [Numerical failure policy](docs/NUMERICAL_FAILURE_POLICY.md): stable calculations,
+  declared fallbacks and fail-closed scientific error handling.
 - [Limitations](docs/LIMITATIONS.md): current model and backend constraints.
 
 ## Development checks
