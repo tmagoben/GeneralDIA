@@ -46,5 +46,8 @@ class TwoStateAvoidedCrossing:
             coordinate = coordinate.to(torch.get_default_dtype())
         if not torch.isfinite(coordinate).all():
             raise ValueError("coordinate must contain finite values")
-        magnitude = torch.sqrt((self.slope * coordinate) ** 2 + self.coupling**2)
+        # hypot avoids intermediate squaring overflow for large finite coordinates.
+        magnitude = torch.hypot(self.slope * coordinate, torch.full_like(coordinate, self.coupling))
+        if not torch.isfinite(magnitude).all():
+            raise ValueError("analytic energies overflowed finite floating-point range")
         return torch.stack((-magnitude, magnitude), dim=-1)
