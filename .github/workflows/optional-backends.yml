@@ -38,6 +38,16 @@ jobs:
           python-version: "3.11"
           cache: pip
       - run: python -m pip install -e ".[dev,pyscf]"
-      - run: pytest tests/test_electronic_structure.py tests/test_fci_dipoles.py tests/test_fci_charged.py tests/test_h3plus_ci.py
+      - name: Run complete PySCF-installed suite with scientific coverage gate
+        run: >
+          pytest --cov=generaldia --cov-report=term-missing
+          --cov-report=xml:coverage-pyscf.xml --cov-fail-under=88
+      - name: Archive full scientific coverage report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-scientific-pyscf
+          path: coverage-pyscf.xml
+          if-no-files-found: warn
       - run: python examples/pyscf/01_h2_rhf.py
       - run: python examples/pyscf/03_lih_shared_operators.py
