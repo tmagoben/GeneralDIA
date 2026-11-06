@@ -104,7 +104,7 @@ def test_hermitian_constructor_batched_integer_diagonal_and_complex_offdiagonals
         (torch.ones(2), torch.ones(2), -0.01, "overlap_floor"),
         (torch.zeros(2), torch.ones(2), 0.0, "nonzero vectors"),
         (torch.ones(2), torch.zeros(2), 0.0, "nonzero vectors"),
-        (torch.ones(2), torch.ones(2), 1.0, "orthogonal"),
+        (torch.ones(2), torch.ones(2), 1.0, "overlap_floor"),
     ],
 )
 def test_phase_alignment_rejects_invalid_or_unresolved_vectors(
