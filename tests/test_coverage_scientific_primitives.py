@@ -101,7 +101,7 @@ def test_hermitian_constructor_batched_integer_diagonal_and_complex_offdiagonals
     [
         (torch.ones(2), torch.ones(3), 0.0, "matching shapes"),
         (torch.ones(1, 2), torch.ones(1, 2), 0.0, "vectors"),
-        (torch.ones(2), torch.ones(2), -0.01, "cannot be negative"),
+        (torch.ones(2), torch.ones(2), -0.01, "overlap_floor"),
         (torch.zeros(2), torch.ones(2), 0.0, "nonzero vectors"),
         (torch.ones(2), torch.zeros(2), 0.0, "nonzero vectors"),
         (torch.ones(2), torch.ones(2), 1.0, "orthogonal"),
