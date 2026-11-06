@@ -25,6 +25,8 @@ def unpack_real_symmetric(packed: Tensor, n: int) -> Tensor:
     packed = torch.as_tensor(packed)
     if packed.ndim < 1:
         raise ValueError("packed must have at least one dimension")
+    if packed.is_complex():
+        raise ValueError("packed must contain real values")
     expected = n * (n + 1) // 2
     if packed.shape[-1] != expected:
         raise ValueError(f"packed has {packed.shape[-1]} values; expected {expected} for n={n}")
