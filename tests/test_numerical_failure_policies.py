@@ -265,3 +265,19 @@ def test_training_canonical_seed_is_consumable_by_numpy_and_torch():
     np.random.seed(config.seed)
     torch.Generator().manual_seed(config.seed)
     assert np.random.randint(0, 1000) == 605
+
+
+def test_integer_real_symmetric_packing_is_promoted_to_float_for_eigensolver():
+    matrix = unpack_real_symmetric(torch.tensor([2, 1, 3], dtype=torch.int64), 2)
+    assert matrix.dtype == torch.get_default_dtype()
+    torch.testing.assert_close(torch.linalg.eigvalsh(matrix), torch.linalg.eigvalsh(matrix.mH))
+
+
+def test_hermitian_constructor_preserves_double_precision_offdiagonal_components():
+    diagonal = torch.tensor([1.0, -2.0], dtype=torch.float32)
+    tiny_complex_coupling = torch.tensor([0.12345678912345], dtype=torch.float64)
+    imaginary = torch.tensor([0.25], dtype=torch.float32)
+    matrix = complex_hermitian_from_parts(diagonal, tiny_complex_coupling, imaginary)
+    assert matrix.dtype == torch.complex128
+    assert matrix[0, 1].real.item() == pytest.approx(tiny_complex_coupling[0].item(), abs=1e-14)
+    torch.testing.assert_close(matrix, matrix.mH, atol=0, rtol=0)
