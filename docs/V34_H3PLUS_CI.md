@@ -68,6 +68,11 @@ direct last-to-first overlap of the actual FCI wavefunctions.
   independent pi reference. These synthetic links are explicitly
   **not** presented as physical wavefunction overlaps.
 
+Independent robustness tests repeat the physical CI certificate at mean bond
+0.90 angstrom and loop radius 0.045 angstrom (8, 12, 16 mesh points),
+and verify that applying a fixed cyclic permutation of the identical protons
+to all nuclear geometries leaves the FCI energies and Berry holonomy unchanged.
+
 All conditions return explicit booleans in a `H3PlusCIEvidence` object;
 one failure marks the benchmark **failed**. The complete real PySCF
 calculation is an executable CI gate rather than a skipped optional test.
@@ -85,6 +90,16 @@ and gap evidence, numerical thresholds, method, PySCF version, repository
 revision `GITHUB_SHA`, and the full per-control pass/fail breakdown.
 GitHub Actions archives it as a downloadable `h3plus-physical-ci-evidence`
 artifact for 90 days and fails if required output is missing.
+
+The repository also pins a PySCF 2.15 **computed regression baseline** in
+`tests/goldens/h3plus_fci_sto3g_reference.json`. It includes four
+equilateral singlet energies, both branching gap ratios, the minimum
+on-loop E1-E2 gap, reference phases and smallest selected-state overlap.
+The regression test compares these with documented nonzero numerical
+tolerances. This snapshot is derived from our own earlier real FCI run,
+so it protects against implementation drift but **does not constitute
+a separate experimental or electronic-structure method oracle**.
+The originating CI run and artifact IDs are recorded in the JSON.
 
 ## Scientific limits and next steps
 
