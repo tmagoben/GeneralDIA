@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from math import isfinite
+
 import torch
 from torch import Tensor
 
@@ -17,10 +19,14 @@ def align_phase(reference: Tensor, candidate: Tensor, *, overlap_floor: float = 
     candidate = torch.as_tensor(candidate, device=reference.device)
     if reference.shape != candidate.shape or reference.ndim != 1:
         raise ValueError("reference and candidate must be vectors with matching shapes")
-    if overlap_floor < 0:
-        raise ValueError("overlap_floor cannot be negative")
+    if not isfinite(overlap_floor) or not 0 <= overlap_floor < 1:
+        raise ValueError("overlap_floor must be finite and in [0, 1)")
+    if not torch.isfinite(reference).all() or not torch.isfinite(candidate).all():
+        raise ValueError("phase alignment requires finite vectors")
     reference_norm = torch.linalg.vector_norm(reference)
     candidate_norm = torch.linalg.vector_norm(candidate)
+    if not torch.isfinite(reference_norm) or not torch.isfinite(candidate_norm):
+        raise ValueError("phase alignment requires finite vector norms")
     if reference_norm == 0 or candidate_norm == 0:
         raise ValueError("phase alignment requires nonzero vectors")
     overlap = torch.vdot(reference, candidate)
