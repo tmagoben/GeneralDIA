@@ -41,7 +41,7 @@ jobs:
       - name: Run complete PySCF-installed suite with scientific coverage gate
         run: >
           pytest --cov=generaldia --cov-report=term-missing
-          --cov-report=xml:coverage-pyscf.xml --cov-fail-under=88
+          --cov-report=xml:coverage-pyscf.xml --cov-fail-under=92
       - name: Archive full scientific coverage report
         if: always()
         uses: actions/upload-artifact@v4
