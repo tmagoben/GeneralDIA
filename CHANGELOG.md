@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+- v3.4.0.dev1 introduces finite-state certification for Berry/Wilson topology,
+  independent Hamiltonian derivative-coupling numerators, and omitted-state
+  sensitivity with explicit near-gap and truncated-manifold rejection controls.
+- Added physical last-to-first FCI cross-geometry molecular overlaps, rank-one
+  Berry-loop refinement diagnostics, and mandatory PySCF H2 molecular-loop CI.
+  The H2 loop is a topologically trivial molecular integration control, not
+  a molecular conical-intersection result. Full polyatomic CI, omitted-state
+  completeness, SOC and nonadiabatic trajectory certification remain open.
+
 - v3.3.0.dev1 adds `SharedMolecularOperators` with real/complex Hermitian H and
   polar-vector dipoles, one common tracked reporting frame, dipole target transport,
   and dimensionless dipole/cross-operator path losses. Existing H-only APIs remain.
