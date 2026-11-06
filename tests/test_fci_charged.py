@@ -20,9 +20,7 @@ def pyscf_single_thread():
 
 def _geometries():
     # Intentionally asymmetric triangles: avoid state degeneracies in charge tests.
-    points = np.array(
-        [[0.0, 0.0, 0.0], [0.91, 0.0, 0.0], [0.41, 0.74, 0.0]]
-    )
+    points = np.array([[0.0, 0.0, 0.0], [0.91, 0.0, 0.0], [0.41, 0.74, 0.0]])
     next_points = points.copy()
     next_points[2, 1] += 0.025
     return np.stack((points, next_points))
@@ -47,9 +45,7 @@ def test_total_dipole_of_ion_obeys_charge_translation_law():
     move_angstrom = np.array([0.21, -0.13, 0.16])
     backend = FCIDipoleBackend(charge=1, n_states=2, conv_tol=1e-11)
     original = backend.calculate_path([1, 1, 1], coords, path_id="h3plus-original")
-    moved = backend.calculate_path(
-        [1, 1, 1], coords + move_angstrom, path_id="h3plus-moved"
-    )
+    moved = backend.calculate_path([1, 1, 1], coords + move_angstrom, path_id="h3plus-moved")
     # 1 bohr = 0.529177210903 angstrom; a +1 ion shifts by +delta_bohr.
     displacement_bohr = torch.from_numpy(move_angstrom / 0.529177210903)
     for before, after in zip(original, moved, strict=True):
@@ -95,9 +91,7 @@ def test_charged_overlap_matches_explicit_two_electron_determinant_products():
         )
         references.append((mol, mo, roots))
     left, right = references
-    orbital_overlap = (
-        left[1].T @ gto.intor_cross("int1e_ovlp", left[0], right[0]) @ right[1]
-    )
+    orbital_overlap = left[1].T @ gto.intor_cross("int1e_ovlp", left[0], right[0]) @ right[1]
     explicit = np.array(
         [
             [
