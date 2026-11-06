@@ -2,7 +2,7 @@
 
 ## Scope
 
-This policy governs the `v3.4.0.dev3` development line's finite-state,
+This policy governs the `v3.4.0.dev4` development line's finite-state,
 reference-geometry, matrix, training, and small-quantum validation routines.
 Scientific quantities must not be fabricated when an electronic calculation
 fails, a gauge cannot be identified, or data are underconstrained.
@@ -58,8 +58,8 @@ nuclear coordinates cannot be silently cast to real.
 Passing `gradient_clip_norm=None` explicitly disables gradient clipping;
 positive finite clipping thresholds enable it. This is a documented
 configuration choice, not an implicit response to numerical instability.
-Epochs, seeds, and log intervals are nonboolean integers; learning rate and
-clipping controls must be finite and positive.
+Epochs and log intervals are positive nonboolean integers. Seeds are normalized\nto Python integers in NumPy's supported interval [0, 2**32 - 1]; learning rate and
+clipping controls must be finite and positive. Real/complex electronic frames\nare promoted to a common complex dtype before gauge alignment; no phase is\ndropped when a real reference is compared with a complex candidate.
 
 ## Scientific situations where fallback is **not** allowed
 
