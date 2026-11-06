@@ -294,6 +294,8 @@ thresholds behind every transition.
   through learned-Hamiltonian quantum benchmarks.
 - [Quantum encoding](docs/QUANTUM_ENCODING.md): finite-state encoding and its scaling.
 - [Reproducibility](docs/REPRODUCIBILITY.md): records required for a repeatable experiment.
+- [Coverage policy](docs/COVERAGE_POLICY.md): separate core-only and PySCF-installed
+  scientific suite measurement, thresholds, source scope and remaining gaps.
 - [Limitations](docs/LIMITATIONS.md): current model and backend constraints.
 
 ## Development checks
@@ -307,7 +309,9 @@ python examples/06_state_tracking.py
 ```
 
 GitHub Actions runs the core suite across supported Python versions and one Windows
-job. Separate scheduled jobs exercise PySCF, PennyLane, and Qiskit.
+job. A separate complete PySCF-installed test run enforces the stronger full-science
+coverage threshold and archives its XML report; optional quantum integrations
+have independent tests. See the [coverage policy](docs/COVERAGE_POLICY.md).
 
 ## License
 
