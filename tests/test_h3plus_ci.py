@@ -1,6 +1,8 @@
 """Physical H3+ singlet-FCI CI evidence; mandatory in the real-PySCF job."""
 
+import json
 import math
+from pathlib import Path
 
 import numpy as np
 import pytest
@@ -45,6 +47,32 @@ def test_molecular_h3plus_excited_ci_has_converged_physical_pi_holonomy():
     assert abs(evidence.isospectral_energy_only_phase_radians) < 1e-12
     assert evidence.gauge_phase_error_radians < 1e-9
     assert all(len(digest) == 64 for digest in evidence.geometry_sha256.values())
+
+    # Pinned PySCF 2.15 baseline is a reproducibility regression, not an
+    # independent experimental oracle. Tolerances admit minor solver drift.
+    golden_path = Path(__file__).parent / "goldens" / "h3plus_fci_sto3g_reference.json"
+    golden = json.loads(golden_path.read_text(encoding="utf-8"))
+    assert evidence.basis == golden["basis"]
+    assert evidence.charge == golden["charge"]
+    assert evidence.refinement_points == tuple(golden["refinement_points"])
+    np.testing.assert_allclose(
+        evidence.center_energies_hartree,
+        golden["center_energies_hartree"],
+        atol=2e-6,
+        rtol=0,
+    )
+    np.testing.assert_allclose(
+        evidence.branching_gap_ratios,
+        golden["branching_gap_ratios"],
+        atol=0.05,
+        rtol=0,
+    )
+    assert evidence.min_excited_gap_on_loop_hartree == pytest.approx(
+        golden["min_excited_gap_on_loop_hartree"], abs=0.001
+    )
+    assert evidence.minimum_link_strength == pytest.approx(
+        golden["minimum_link_strength"], abs=0.03
+    )
 
 
 @pytest.mark.parametrize(
