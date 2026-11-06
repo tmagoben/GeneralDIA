@@ -221,6 +221,21 @@ count, orbital overlap and the ionic total-dipole translation law. They do
 [charged singlet references](docs/V34_CHARGED_FCI.md) and
 [the next physical CI milestone](https://github.com/tmagoben/GeneralDIA/issues/9).
 
+## Numerical reliability hardening (v3.4.0.dev4)
+
+The current development checkpoint strengthens finite-value and state-dimension
+checks, preserves complex electronic phases when aligning mixed real/complex
+frames, and rejects undefined gauges rather than inventing reference results.
+Safe numerical formulas use `hypot` for analytic two-state eigenvalues and
+scale positive dataset split weights before normalization to avoid intermediate
+overflow. Model-training seeds are explicitly bounded and normalized for both
+NumPy and PyTorch. The molecular H3+ CI benchmark and its physical checks are
+retained without weaker tolerances.
+
+See [numerical failure and fallback policy](docs/NUMERICAL_FAILURE_POLICY.md)
+and [coverage policy](docs/COVERAGE_POLICY.md). The full PySCF suite has a
+separate mandatory coverage gate from the dependency-light core suite.
+
 ## Physical H3+ conical-intersection benchmark (v3.4.0.dev3)
 
 The current branch computes **actual molecular** FCI wavefunctions around the
