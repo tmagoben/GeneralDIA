@@ -81,9 +81,7 @@ def test_atom_relabeling_preserves_molecular_energies_and_holonomy():
     permuted = backend.calculate_loop(
         [1, 1, 1], geometry[:, [2, 0, 1], :], path_id="h3plus-permuted"
     )
-    torch.testing.assert_close(
-        ordinary.path.energies, permuted.path.energies, atol=1e-9, rtol=1e-9
-    )
+    torch.testing.assert_close(ordinary.path.energies, permuted.path.energies, atol=1e-9, rtol=1e-9)
     for state in (1, 2):
         selector = np.s_[:, state : state + 1, state : state + 1]
         phase_a = wilson_loop(ordinary.cyclic_overlaps[selector]).berry_phase
