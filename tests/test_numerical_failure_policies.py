@@ -244,9 +244,7 @@ def test_phase_alignment_promotes_real_reference_to_complex_without_losing_phase
 
 def test_unitary_procrustes_promotes_real_and_complex_subspace_frames():
     reference = torch.eye(3, dtype=torch.float64)[:, :2]
-    phases = torch.diag(
-        torch.exp(torch.tensor([0.3j, -0.2j], dtype=torch.complex128))
-    )
+    phases = torch.diag(torch.exp(torch.tensor([0.3j, -0.2j], dtype=torch.complex128)))
     rotated = reference.to(torch.complex128) @ phases
     aligned = unitary_procrustes(reference, rotated)
     assert aligned.dtype == torch.complex128
