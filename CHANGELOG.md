@@ -2,6 +2,17 @@
 
 ## Unreleased
 
+- v3.4.0.dev4 scientific reliability hardening: real/complex gauge dtype
+  promotion, finite/Hermitian matrix guards, strict state-count and training
+  control validation, deterministic NumPy/PyTorch seed compatibility,
+  overflow-resistant two-state eigenvalues and normalized dataset split weights.
+  Invalid physical references and undefined phases continue to fail closed;
+  no synthetic numerical fallbacks or weakened molecular acceptance gates.
+- Added adversarial unit and physical-backend regressions. The coverage policy
+  distinguishes dependency-light core testing from the full PySCF-installed
+  scientific suite and raises explicit minimums to 87% and 92%, respectively.
+
+
 - v3.4.0.dev3 adds a physical charged H3+ singlet-FCI/STO-3G
   excited-state conical-intersection certification with explicit E-mode
   branching geometry, direct cross-AO cyclic overlaps, local energy-gap
