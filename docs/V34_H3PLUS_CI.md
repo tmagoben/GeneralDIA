@@ -1,6 +1,7 @@
 # Physical H3+ excited-singlet conical-intersection certificate
 
-**Stage:** v3.4.0.dev3, finite-basis molecular scientific development gate.
+**Stages:** v3.4.0.dev3 single-basis certificate; v3.4.0.dev5 independent
+STO-3G / 6-31G comparison and offline evidence validation.
 
 This benchmark is the first GeneralDIA certification that uses an actual
 molecular FCI reference *and* a symmetry-required conical intersection. It is
@@ -17,11 +18,12 @@ degeneracy linearly. See Wang & Mazziotti, PCCP 26 (2024), 11491-11497,
 and Barragán et al., JCP 124 (2006), 184303,
 [DOI 10.1063/1.2193516](https://doi.org/10.1063/1.2193516).
 
-We use *all-electron restricted singlet FCI/STO-3G* for H3+ (three protons,
+We use *all-electron restricted singlet FCI* for H3+ (three protons,
 two electrons, charge +1), with the four lowest singlet energies. The
 physical electronic-state overlaps are independently established by the
 existing cross-AO, cross-orbital, FCI-determinant overlap adapter; they are
-not overlaps of coefficient arrays in unrelated molecular bases.
+not overlaps of coefficient arrays in unrelated molecular bases. The original
+certificate uses STO-3G; the comparison reruns every calculation in 6-31G.
 
 ## Two-dimensional nuclear branching coordinates
 
@@ -85,8 +87,8 @@ pytest tests/test_h3plus_geometry.py tests/test_h3plus_ci.py -q
 python examples/15_h3plus_molecular_ci.py > h3plus_ci_evidence.json
 ```
 
-The JSON includes nuclear-geometry SHA-256 digests for each loop, all phase
-and gap evidence, numerical thresholds, method, PySCF version, repository
+The JSON includes nuclear-geometry SHA-256 digests for each loop, phase and
+gap summaries, method, PySCF version, repository
 revision `GITHUB_SHA`, and the full per-control pass/fail breakdown.
 GitHub Actions archives it as a downloadable `h3plus-physical-ci-evidence`
 artifact for 90 days and fails if required output is missing.
@@ -101,10 +103,74 @@ so it protects against implementation drift but **does not constitute
 a separate experimental or electronic-structure method oracle**.
 The originating CI run and artifact IDs are recorded in the JSON.
 
+## Two-basis evidence and offline validation
+
+The comparison uses R=0.875 angstrom, r=0.06 angstrom and meshes (8,16,32)
+in both bases. Charge +1, spin 0, four singlet roots, SCF/FCI `conv_tol=1e-11`
+and the eight-orbital safety cap are unchanged. Each basis is evaluated by
+a separate backend instance. There is no cross-basis reuse of CI coefficients,
+energies or overlap matrices and no fallback to STO-3G if 6-31G fails.
+Thresholds are explicit in the comparison JSON, alongside per-basis settings,
+results, pass status and the shared-geometry digest check.
+
+Measured with Python 3.12, NumPy 2.3.5, PyTorch 2.15.0+cpu and PySCF 2.15.0
+on 2026-11-11 (one OpenMP thread):
+
+| Basis | x gap at r/2 (Eh) | x gap at r (Eh) | y gap at r/2 (Eh) | y gap at r (Eh) |
+| --- | ---: | ---: | ---: | ---: |
+| STO-3G | 0.0377772290 | 0.0750179974 | 0.0381000273 | 0.0763157801 |
+| 6-31G | 0.0156160136 | 0.0309055969 | 0.0157809634 | 0.0315625232 |
+
+| Basis | x ratio | y ratio | Minimum selected-state link | Both enclosing phases | Nonenclosing phase | Checks |
+| --- | ---: | ---: | ---: | --- | --- | --- |
+| STO-3G | 1.98579937 | 2.00303741 | 0.91324794 | pi modulo 2 pi | 0 | 10/10 pass |
+| 6-31G | 1.97909644 | 2.00003780 | 0.91112611 | pi modulo 2 pi | 0 | 10/10 pass |
+
+The equilateral excited gaps were below 1e-14 hartree in both calculations.
+The topology survives this basis change while the gap magnitudes change
+substantially; this is not an energy-convergence study.
+
+Run the two calculations serially, then check the evidence without installed
+scientific packages (POSIX shell; in PowerShell set `$env:OMP_NUM_THREADS="1"`
+before running the Python commands):
+
+```bash
+OMP_NUM_THREADS=1 python examples/15_h3plus_molecular_ci.py > h3plus_ci_evidence.json
+OMP_NUM_THREADS=1 python examples/16_h3plus_basis_comparison.py > h3plus_basis_comparison.json
+python -I -S scripts/check_h3plus_report.py h3plus_ci_evidence.json h3plus_basis_comparison.json
+```
+
+All three commands returned exit code 0 in the local validation. The last
+command uses only the Python standard library: `-I -S` removes environment
+path injection and site-package loading. A deliberately failing copy with
+6-31G ground-state isolation set to zero returned exit code 1 and named
+`6-31g.checks.ground_and_higher_root_isolation` as the failed required check.
+
+The checker accepts the original dev3 single-basis report and the versioned
+comparison format. It rejects duplicate keys, nonfinite numbers, absent
+required checks, nonboolean flags, incompatible units, changed thresholds,
+inconsistent phase convergence/gap ratios and mismatched geometry digests.
+It independently recomputes the scientific decisions from the supplied
+measurements. It cannot establish that measurements came from an authentic
+FCI calculation; physical regeneration remains a separate mandatory CI step.
+
+The comparison snapshot in `tests/goldens/h3plus_basis_comparison_reference.json`
+is a computed regression baseline, not an independent experimental oracle.
+It records the code revision and SHA256 fingerprints of the numerical source
+files. The original STO-3G snapshot and single-basis report format remain
+unchanged. CI regenerates both reports, checks them offline and archives both
+in `h3plus-physical-ci-evidence`.
+
 ## Scientific limits and next steps
 
-- The model uses one small basis and a fixed bond-length seam cross-section;
-  test radii, mean bond lengths, and larger bases should be varied before
+Local dev5 validation passed: core-only **455 passed, 37 skipped, 88.65%**
+configured branch-aware coverage; PySCF-installed **484 passed, 8 skipped,
+93.62%** coverage. The unchanged gates are 87% and 92%, respectively. Ruff
+lint/format and wheel/sdist builds passed. These are separate environments;
+hosted Windows/Python-matrix and quantum-backend results remain separate checks.
+
+- The comparison uses two small bases and a fixed bond-length seam cross-section;
+  further radii, mean bond lengths, and larger bases should be varied before
   extrapolation beyond this benchmark.
 - The finite four-root gap isolation check does not prove physical
   completeness of *all* molecular states beyond that explicit window.
@@ -115,3 +181,6 @@ The originating CI run and artifact IDs are recorded in the JSON.
   validates nonadiabatic forces, electronic decoherence, propagators,
   conical-intersection branching dynamics, or Berry-phase-aware quantum
   wavepacket trajectories. Those require subsequent independent oracles.
+- The learned-Hamiltonian gate in issue #12 remains open: symmetry-covariant
+  E-mode representation, physical-path training, held-out paths and an
+  energy-matched topology-wrong learned-model control are not supplied here.

@@ -114,6 +114,7 @@ class H3PlusCIEvidence:
     minimum_link_strength: float
     geometry_sha256: dict[str, str]
     checks: dict[str, bool]
+    branching_gaps_hartree: tuple[float, float, float, float] | None = None
 
     @property
     def passed(self) -> bool:
@@ -123,11 +124,12 @@ class H3PlusCIEvidence:
 
 def certify_h3plus_molecular_ci(
     *,
+    basis: str = BASIS,
     bond_angstrom: float = 0.875,
     radius_angstrom: float = 0.06,
     refinement_points: tuple[int, ...] = (8, 16, 32),
 ) -> H3PlusCIEvidence:
-    """Certify the H3+ S1/S2 CI against FCI/STO-3G physical overlaps.
+    """Certify the H3+ S1/S2 CI against finite-basis FCI physical overlaps.
 
     Positive controls: high-symmetry E' gap closing, branching along two
     independent E distortions, isolated S1 and S2 loops, pi Berry phases,
@@ -137,12 +139,17 @@ def certify_h3plus_molecular_ci(
     All thresholds and underlying numerical observables are returned.
     This cannot certify arbitrary nuclear trajectories or orbital bases.
     """
-    if tuple(sorted(set(refinement_points))) != refinement_points or len(refinement_points) < 3:
+    if (
+        not isinstance(refinement_points, tuple)
+        or len(refinement_points) < 3
+        or any(type(n) is not int or n < 6 for n in refinement_points)
+        or tuple(sorted(set(refinement_points))) != refinement_points
+    ):
         raise ValueError("refinement_points must be >=3 strictly increasing unique integers")
     if not isfinite(radius_angstrom) or radius_angstrom <= 0:
         raise ValueError("radius_angstrom must be finite and positive")
     backend = FCIDipoleBackend(
-        basis=BASIS, n_states=4, charge=CHARGE, conv_tol=1e-11, max_orbitals=8
+        basis=basis, n_states=4, charge=CHARGE, conv_tol=1e-11, max_orbitals=8
     )
     center = h3plus_triangle(bond_angstrom)
     x_half = h3plus_triangle(bond_angstrom, radius_angstrom / 2, 0.0)
@@ -157,6 +164,8 @@ def certify_h3plus_molecular_ci(
     energies = axis.energies.numpy()
     central_gap = float(energies[0, 2] - energies[0, 1])
     gaps = energies[:, 2] - energies[:, 1]
+    if not np.isfinite(gaps).all() or np.any(gaps[1:] <= 0):
+        raise ValueError("branching gaps must be finite and positive in both E directions")
     ratios = (float(gaps[2] / gaps[1]), float(gaps[4] / gaps[3]))
 
     circular = []
@@ -255,7 +264,7 @@ def certify_h3plus_molecular_ci(
         ),
     }
     return H3PlusCIEvidence(
-        basis=BASIS,
+        basis=basis,
         charge=CHARGE,
         bond_angstrom=bond_angstrom,
         radius_angstrom=radius_angstrom,
@@ -275,4 +284,5 @@ def certify_h3plus_molecular_ci(
         minimum_link_strength=min(minimum_links),
         geometry_sha256=digests,
         checks=checks,
+        branching_gaps_hartree=tuple(map(float, gaps[1:])),
     )
