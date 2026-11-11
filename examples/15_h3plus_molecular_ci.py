@@ -19,6 +19,10 @@ def main() -> None:
     record = certify_h3plus_molecular_ci(
         bond_angstrom=0.875, radius_angstrom=0.06, refinement_points=(8, 16, 32)
     )
+    # Preserve the dev3 single-basis JSON contract. The comparison report
+    # additionally includes the four individual branching gaps.
+    legacy_result = asdict(record)
+    legacy_result.pop("branching_gaps_hartree")
     output = {
         "kind": "molecular-h3plus-excited-singlet-ci-certification",
         "stage": "v3.4.0.dev3",
@@ -32,7 +36,7 @@ def main() -> None:
         "phase_convention": "minus argument of the cyclic physical overlap product",
         "geometry_units": "angstrom",
         "energies_and_gaps_units": "hartree",
-        "result": asdict(record),
+        "result": legacy_result,
         "pass": record.passed,
         "limits": (
             "finite-basis restricted H3+ CI evidence only; no global state "

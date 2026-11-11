@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+- v3.4.0.dev5 adds independent STO-3G / 6-31G H3+ CI evidence on identical
+  geometries, including individual x/y half/full-radius gaps, unchanged
+  numerical thresholds, per-basis pass/fail and source fingerprints. The
+  original single-basis JSON format remains unchanged. A standard-library
+  checker independently validates both formats, rejects malformed or
+  inconsistent evidence, and runs with site packages disabled in CI.
+- Fix the dev4 final-head Ruff formatting failure without numerical changes.
+  Validate refinement meshes before electronic evaluation and fail explicitly
+  on unresolved branching gaps before computing ratios.
+
 - v3.4.0.dev4 scientific reliability hardening: real/complex gauge dtype
   promotion, finite/Hermitian matrix guards, strict state-count and training
   control validation, deterministic NumPy/PyTorch seed compatibility,

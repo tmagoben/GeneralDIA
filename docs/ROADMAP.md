@@ -90,6 +90,14 @@ expected trivial phase; H2 is **not** a molecular conical-intersection test.
 See [physical molecular loops](V34_MOLECULAR_LOOPS.md).
 These are partial development gates, not a completed v3.4 release.
 
+The dev3 checkpoint added the physical H3+ conical-intersection reference.
+Dev4 hardens numerical boundaries and separates core/PySCF coverage gates.
+Dev5 compares independent STO-3G and 6-31G certificates on identical geometry
+paths and provides a dependency-free evidence checker. Next is issue #12:
+a symmetry-covariant learned H3+ Hamiltonian with held-out physical-path
+validation and an energy-matched, wrong-topology control. Passing the two
+physical reference calculations does not satisfy that learned-model gate.
+
 Passing these tests establishes only the documented finite-state and geometry-domain
 claims. It does not by itself establish trajectory or chemical accuracy.
 

@@ -223,7 +223,7 @@ count, orbital overlap and the ionic total-dipole translation law. They do
 
 ## Numerical reliability hardening (v3.4.0.dev4)
 
-The current development checkpoint strengthens finite-value and state-dimension
+The dev4 checkpoint strengthens finite-value and state-dimension
 checks, preserves complex electronic phases when aligning mixed real/complex
 frames, and rejects undefined gauges rather than inventing reference results.
 Safe numerical formulas use `hypot` for analytic two-state eigenvalues and
@@ -254,6 +254,34 @@ python examples/15_h3plus_molecular_ci.py
 Read [the physical H3+ CI certificate](docs/V34_H3PLUS_CI.md) for the
 scientific controls and limitations. This does not certify molecular
 derivative couplings, SOC, or nonadiabatic nuclear trajectories.
+
+## H3+ basis comparison and offline evidence (v3.4.0.dev5)
+
+The next checkpoint runs independent FCI calculations in STO-3G and 6-31G
+on the same geometries and 8/16/32-point loops. Each basis retains its own
+wavefunctions, physical overlaps, energies, four branching gaps, settings and
+ten acceptance checks. Geometry digests must match across bases.
+
+```bash
+OMP_NUM_THREADS=1 python examples/15_h3plus_molecular_ci.py > h3plus_ci_evidence.json
+OMP_NUM_THREADS=1 python examples/16_h3plus_basis_comparison.py > h3plus_basis_comparison.json
+python -I -S scripts/check_h3plus_report.py h3plus_ci_evidence.json h3plus_basis_comparison.json
+```
+
+The original single-basis command and JSON schema are preserved. The checker
+uses only the Python standard library; it recomputes acceptance from the
+reported numbers, rejects changed thresholds and inconsistent flags, and
+exits nonzero with the failed check's name. It checks report consistency,
+not the authenticity of supplied wavefunctions or provenance.
+
+Both bases passed with PySCF 2.15.0 on 2026-11-11. The x/y full-to-half
+branching ratios were **1.985799 / 2.003037** for STO-3G and
+**1.979096 / 2.000038** for 6-31G; both excited-state Berry phases were pi
+modulo 2 pi and the nonenclosing phases were zero. The corresponding gaps
+and reproducible commands are in [the evidence record](docs/V34_H3PLUS_CI.md).
+This is reference validation for [the learned-Hamiltonian milestone](https://github.com/tmagoben/GeneralDIA/issues/12),
+which remains open; it does not establish complete-basis convergence or
+certify the learned model.
 
 ## Path-aware visual diagnostics
 
