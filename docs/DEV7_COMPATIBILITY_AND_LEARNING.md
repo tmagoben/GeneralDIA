@@ -103,6 +103,19 @@ including explicitly supplied BasicSimulator instances. Other supplied
 backends retain their existing compilation responsibility. Regression tests
 include composite Bell preparation, Pauli-Y changes and finite-shot VQE.
 
+The first hosted minimum-version run also exposed noise in the SA-CASSCF
+finite-difference oracle. State-specific energies are not stationary under
+state-average orbital rotations; an energy threshold of 1e-10 leaves the
+default orbital-gradient threshold at 1e-5. One hosted difference amplified
+the residual into an 8.28e-5 Eh/bohr discrepancy. The analytic gradient under
+test still uses the wrapper defaults. Its independent displaced-energy
+reference now uses `conv_tol=1e-14` (orbital threshold 1e-7) and two step
+sizes, 2e-4 and 1e-4 A. Both must meet the unchanged 2e-5 Eh/bohr gradient
+tolerance, and the two differences must agree within 2e-6 Eh/bohr.
+PySCF documents its [square-root orbital tolerance default](https://pyscf.org/pyscf_api_docs/pyscf.mcscf.html).
+Local tighter-convergence/step studies gave about 1e-7 Eh/bohr errors;
+the change tightens the reference instead of relaxing acceptance.
+
 CUDA tests compare CPU/GPU eigenvalues, coordinate/parameter gradients and
 one optimizer step in float32/float64, plus complex128 Berry holonomy.
 Ordinary CPU runs explicitly skip these three tests. The manual workflow

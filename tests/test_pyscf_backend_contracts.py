@@ -94,17 +94,30 @@ def test_real_wrapper_gradients_match_energy_finite_differences(serial_pyscf, me
     geometry = np.array([[0, 0, 0], [0, 0, 1.5]], dtype=float)
     backend = RHFBackend() if method == "rhf" else SACASSCFBackend(2, (1, 1))
     center = backend.calculate(numbers, geometry)
-    step = 1e-4
-    plus, minus = geometry.copy(), geometry.copy()
-    plus[1, 2] += step
-    minus[1, 2] -= step
-    derivative = (
-        backend.calculate(numbers, plus).energies_hartree
-        - backend.calculate(numbers, minus).energies_hartree
-    ) / (2 * step * ANGSTROM_TO_BOHR)
-    np.testing.assert_allclose(
-        center.gradients_hartree_per_bohr[:, 1, 2], derivative, atol=2e-5, rtol=0
+    # State-specific energies are not stationary under SA orbital rotations.
+    # Default sqrt(conv_tol)=1e-5 orbital residuals can amplify into O(1e-4)
+    # finite-difference noise even when the average energy has converged.
+    # Keep the default wrapper under test, but converge the energy oracle
+    # more tightly (CASSCF orbital threshold 1e-7) and check two step sizes.
+    reference = (
+        RHFBackend(conv_tol=1e-14)
+        if method == "rhf"
+        else SACASSCFBackend(2, (1, 1), conv_tol=1e-14)
     )
+    derivatives = []
+    for step in (2e-4, 1e-4):
+        plus, minus = geometry.copy(), geometry.copy()
+        plus[1, 2] += step
+        minus[1, 2] -= step
+        derivative = (
+            reference.calculate(numbers, plus).energies_hartree
+            - reference.calculate(numbers, minus).energies_hartree
+        ) / (2 * step * ANGSTROM_TO_BOHR)
+        derivatives.append(derivative)
+        np.testing.assert_allclose(
+            center.gradients_hartree_per_bohr[:, 1, 2], derivative, atol=2e-5, rtol=0
+        )
+    np.testing.assert_allclose(derivatives[0], derivatives[1], atol=2e-6, rtol=0)
     np.testing.assert_allclose(center.gradients_hartree_per_bohr.sum(axis=1), 0, atol=2e-7)
     assert center.metadata["converged"] is True
     assert center.metadata["gradient_unit"] == "hartree/bohr"

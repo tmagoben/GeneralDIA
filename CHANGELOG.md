@@ -10,6 +10,9 @@
 - Test the declared scientific dependency floors together, add macOS core
   CI and opt-in CUDA hardware parity checks. Fix Qiskit 1.0 BasicSimulator
   execution by compiling its circuits to supported gates.
+- Converge displaced SA-CASSCF energy references more tightly and require
+  two finite-difference steps to agree, preserving the analytic-gradient
+  acceptance tolerance when testing minimum-version solver behavior.
 
 - v3.4.0.dev6 tests real PySCF failure paths, RHF/SA-CASSCF finite-difference
   gradients and quantum backend contracts. Reject fractional atom labels,
