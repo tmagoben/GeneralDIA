@@ -95,10 +95,15 @@ smoke check also returned exit 0. The initial regression run reproduced
 and quantum tests passed. Hosted platform-matrix results are reported on
 the PR separately from these local measurements.
 
-## Remaining work
+## Remaining work at the dev6 checkpoint
 
 Minimum-supported dependency versions, macOS and GPU execution still lack
 dedicated CI jobs. The combined dependency environment does not prove every
 supported version combination. Physical reference coverage is still limited
 to the documented small molecules and bases; learned H3+ topology on held-out
 paths remains the separate issue #12 milestone.
+
+The [dev7 iteration](DEV7_COMPATIBILITY_AND_LEARNING.md) adds minimum-version
+and macOS jobs, an opt-in CUDA hardware workflow, and an initial learned H3+
+topology experiment. Actual GPU execution and the broader issue #12 scope
+remain separate from those additions.

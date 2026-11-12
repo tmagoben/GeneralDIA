@@ -18,6 +18,8 @@ jobs:
         include:
           - os: windows-latest
             python-version: "3.11"
+          - os: macos-15
+            python-version: "3.11"
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
@@ -63,6 +65,8 @@ jobs:
         run: python examples/15_h3plus_molecular_ci.py > h3plus_ci_evidence.json
       - name: Compare independent STO-3G and 6-31G physical certificates
         run: python examples/16_h3plus_basis_comparison.py > h3plus_basis_comparison.json
+      - name: Fit and certify learned H3+ Hamiltonians on held-out physical paths
+        run: python examples/17_learned_h3plus_topology.py > h3plus_learned_topology.json
       - name: Check both evidence formats without scientific dependencies
         run: python -I -S scripts/check_h3plus_report.py h3plus_ci_evidence.json h3plus_basis_comparison.json
       - name: Validate and display numerical evidence
@@ -77,5 +81,6 @@ jobs:
           path: |
             h3plus_ci_evidence.json
             h3plus_basis_comparison.json
+            h3plus_learned_topology.json
           if-no-files-found: error
           retention-days: 90

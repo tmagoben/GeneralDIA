@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "generaldia"
-version = "3.4.0.dev6"
+version = "3.4.0.dev7"
 description = "Observable-constrained finite-state diabatic Hamiltonian models"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -62,7 +62,10 @@ include = ["generaldia*"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "--strict-markers"
-markers = ["optional: tests requiring optional third-party backends"]
+markers = [
+    "optional: tests requiring optional third-party backends",
+    "gpu: tests requiring real CUDA hardware",
+]
 
 [tool.coverage.run]
 source = ["generaldia"]

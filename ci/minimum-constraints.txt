@@ -1,0 +1,11 @@
+# Declared scientific floors, tested together on CPython 3.10 / Linux CPU.
+# This is a compatibility fixture, not the default installation lockfile.
+numpy==1.24.0
+torch==2.1.0
+scipy==1.10.0
+pyscf==2.8.0
+pennylane==0.40.0
+qiskit==1.0.0
+# PennyLane 0.40 needs the pre-0.8 autoray API and matching Lightning plugin.
+autoray==0.6.11
+pennylane-lightning==0.40.0

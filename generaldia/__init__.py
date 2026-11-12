@@ -11,6 +11,7 @@ from .dataset import (
     TrackedMolecularPath,
     assert_disjoint_paths,
 )
+from .h3plus_model import H3PlusEquivariantHamiltonian, H3PlusFit, fit_h3plus_spectra, h3plus_bonds
 from .loop_convergence import AbelianLoopConvergence, certify_abelian_loop_convergence
 from .losses import LossWeights, observable_loss
 from .molecular import GaussianRBF, SimpleMolecularHamiltonian
@@ -50,6 +51,8 @@ __all__ = [
     "AbelianLoopConvergence",
     "AmbiguousStateTrackingError",
     "GaussianRBF",
+    "H3PlusEquivariantHamiltonian",
+    "H3PlusFit",
     "LoopHolonomy",
     "LossWeights",
     "MolecularDataset",
@@ -84,6 +87,8 @@ __all__ = [
     "energy_gradients",
     "evaluate_model",
     "evaluate_path_model",
+    "fit_h3plus_spectra",
+    "h3plus_bonds",
     "hamiltonian_jacobian",
     "load_checkpoint",
     "observable_loss",
@@ -99,4 +104,4 @@ __all__ = [
     "write_state_tracking_report",
 ]
 
-__version__ = "3.4.0.dev6"
+__version__ = "3.4.0.dev7"

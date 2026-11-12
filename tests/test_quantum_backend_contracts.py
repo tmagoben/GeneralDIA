@@ -85,6 +85,27 @@ def test_three_qubit_ansatz_agrees_across_backends():
 
 
 @pytest.mark.optional
+@pytest.mark.parametrize("explicit_backend", [False, True])
+def test_qiskit_simulator_compiles_composite_gates(explicit_backend):
+    qiskit = pytest.importorskip("qiskit")
+    from qiskit.providers.basic_provider import BasicSimulator
+
+    preparation = qiskit.QuantumCircuit(2)
+    preparation.h(0)
+    preparation.cx(0, 1)
+    state = qiskit.QuantumCircuit(2)
+    state.append(preparation.to_gate(label="Bell preparation"), [0, 1])
+    result = qk.grouped_shot_energy(
+        state,
+        measurement_plan({"ZZ": 0.3, "XX": 0.7}),
+        shots=32,
+        backend=BasicSimulator() if explicit_backend else None,
+    )
+    assert result["expectations"] == pytest.approx({"ZZ": 1, "XX": 1})
+    assert result["energy"] == pytest.approx(1)
+
+
+@pytest.mark.optional
 def test_qiskit_rejects_incompatible_preparation_and_shot_override():
     qiskit = pytest.importorskip("qiskit")
     plan = measurement_plan({"Z": 1})

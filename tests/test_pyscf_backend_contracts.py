@@ -94,17 +94,59 @@ def test_real_wrapper_gradients_match_energy_finite_differences(serial_pyscf, me
     geometry = np.array([[0, 0, 0], [0, 0, 1.5]], dtype=float)
     backend = RHFBackend() if method == "rhf" else SACASSCFBackend(2, (1, 1))
     center = backend.calculate(numbers, geometry)
-    step = 1e-4
-    plus, minus = geometry.copy(), geometry.copy()
-    plus[1, 2] += step
-    minus[1, 2] -= step
-    derivative = (
-        backend.calculate(numbers, plus).energies_hartree
-        - backend.calculate(numbers, minus).energies_hartree
-    ) / (2 * step * ANGSTROM_TO_BOHR)
+
+    # State-specific energies are not stationary under SA orbital rotations.
+    # Default sqrt(conv_tol)=1e-5 orbital residuals can amplify into O(1e-4)
+    # finite-difference noise even when the average energy has converged.
+    # Keep the default wrapper under test. The independent energy oracle
+    # uses LiH's exact axial symmetry and converges orbital/energy residuals.
+    # Symmetry-unrestricted orbital rotations left individual root energies
+    # noisy despite a converged state average. Check the same central roots
+    # explicitly so symmetry cannot silently substitute a different manifold.
+    def reference_energy(positions):
+        from pyscf import gto, mcscf, scf
+
+        molecule = gto.M(
+            atom=[("Li", positions[0]), ("H", positions[1])],
+            basis="sto-3g",
+            unit="Angstrom",
+            symmetry=True,
+            verbose=0,
+        )
+        mean_field = scf.RHF(molecule)
+        mean_field.conv_tol = 1e-13
+        mean_field.conv_tol_grad = 1e-10
+        mean_field.kernel()
+        assert mean_field.converged
+        if method == "rhf":
+            return np.array([mean_field.e_tot])
+        reference = mcscf.CASSCF(mean_field, 2, (1, 1)).state_average([0.5, 0.5])
+        reference.conv_tol = 1e-12
+        reference.conv_tol_grad = 1e-9
+        reference.fcisolver.conv_tol = 1e-13
+        reference.max_cycle_macro = 100
+        reference.kernel()
+        assert reference.converged
+        return np.asarray(reference.e_states)
+
     np.testing.assert_allclose(
-        center.gradients_hartree_per_bohr[:, 1, 2], derivative, atol=2e-5, rtol=0
+        reference_energy(geometry), center.energies_hartree, atol=1e-6, rtol=0
     )
+    derivatives = []
+    # The step study resolves truncation and solver noise at 0.001--0.002 A.
+    # Smaller displacements amplify tiny state-specific energy residuals.
+    for step in (2e-3, 1e-3):
+        plus, minus = geometry.copy(), geometry.copy()
+        plus[1, 2] += step
+        minus[1, 2] -= step
+        derivative = (reference_energy(plus) - reference_energy(minus)) / (
+            2 * step * ANGSTROM_TO_BOHR
+        )
+        derivatives.append(derivative)
+        np.testing.assert_allclose(
+            center.gradients_hartree_per_bohr[:, 1, 2], derivative, atol=2e-5, rtol=0
+        )
+    np.testing.assert_allclose(derivatives[0], derivatives[1], atol=2e-6, rtol=0)
     np.testing.assert_allclose(center.gradients_hartree_per_bohr.sum(axis=1), 0, atol=2e-7)
     assert center.metadata["converged"] is True
     assert center.metadata["gradient_unit"] == "hartree/bohr"

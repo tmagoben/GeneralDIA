@@ -47,6 +47,10 @@ paths.
 GeneralDIA currently provides a compact pair-distance model for method development.
 It does not claim the accuracy or scaling of a modern E(3)-equivariant architecture.
 
+The dev7 checkpoint also fits a restricted symmetry-aware H3+ Hamiltonian and
+checks its topology on held-out physical FCI paths in two orbital bases.
+See [the model, compatibility matrix and remaining limits](docs/DEV7_COMPATIBILITY_AND_LEARNING.md).
+
 ## Processing chain
 
 ```mermaid
@@ -297,6 +301,23 @@ floors for the PySCF, PennyLane and Qiskit wrappers. The original 87% core and
 92% PySCF-only gates keep their historical source scope. The wheel is also
 installed into a separate environment and exercised outside the checkout.
 See [the dev6 validation record](docs/DEV6_BACKEND_VALIDATION.md).
+
+## Learned local H3+ topology and compatibility (v3.4.0.dev7)
+
+```bash
+OMP_NUM_THREADS=1 python examples/17_learned_h3plus_topology.py > learned_h3plus.json
+```
+
+This fits a sixteen-parameter A1+E Hamiltonian separately in STO-3G and
+6-31G, then checks three initializations on unseen bond lengths, radii and
+loop shapes. Both excited-state Berry phases, branching gaps, isolation,
+permutation covariance and a wrong-topology isospectral control must pass
+their declared gates. The symmetry prior imposes the intersection structure;
+the fit does not establish a unique diabatic gauge or validate dynamics.
+
+CI now includes the minimum scientific dependency stack and macOS core
+tests. CUDA parity tests have a separate manual hardware workflow; ordinary
+CPU runs skip them explicitly. See [the dev7 scope and reproduction steps](docs/DEV7_COMPATIBILITY_AND_LEARNING.md).
 
 ## Path-aware visual diagnostics
 
