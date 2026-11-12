@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+- v3.4.0.dev6 tests real PySCF failure paths, RHF/SA-CASSCF finite-difference
+  gradients and quantum backend contracts. Reject fractional atom labels,
+  complex coordinates and invalid solver controls before silent coercion.
+- Add a combined `.[all]` CI job with no package-source exclusions, a 92%
+  total coverage floor and individual 90% floors for the three optional
+  wrappers. Preserve the existing core/PySCF gates and their source scope.
+- Extend H3+ second-radius/bond and proton-permutation checks to 6-31G.
+  Add an installed-wheel smoke check outside the source checkout.
+
 - v3.4.0.dev5 adds independent STO-3G / 6-31G H3+ CI evidence on identical
   geometries, including individual x/y half/full-radius gaps, unchanged
   numerical thresholds, per-basis pass/fail and source fingerprints. The

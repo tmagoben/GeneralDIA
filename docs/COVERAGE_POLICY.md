@@ -45,7 +45,7 @@ integration wrappers are **already omitted** from the coverage universe:
 These exclusions predate this PR and have **not been expanded** to inflate
 the percentage. Consequently, even the full PySCF percentage is a measure
 of the *configured source universe*, not of every Python file in the repo.
-Tracking and testing these three wrappers is a future separate coverage gate.
+Dev6 adds a separate combined-backend gate for these wrappers; see below.
 
 ## Reproduce
 
@@ -67,16 +67,22 @@ rather than worked around with `# pragma: no cover` or source omissions.
 
 ## Highest-priority remaining holes
 
+Dev6 adds `.coveragerc.all` and the `all-backends` job: the complete package
+source universe is measured with all optional dependencies installed, with a
+92% total gate and a 90% gate for each previously omitted wrapper. The older
+core/PySCF figures above retain their original source scope and remain
+separate measurements. See [dev6 validation](DEV6_BACKEND_VALIDATION.md).
+
 The next scientific coverage iteration should focus on:
 
-1. Fail-closed electronic-structure SCF/FCI nonconvergence and physical
-   closing-link corruption, preferably with controlled PySCF fault-injection
-   tests rather than brittle manipulated molecular references.
+1. The SCF/FCI nonconvergence, missing-root and nonfinite-closing-link
+   rejection paths are now covered by controlled real-PySCF fault injection.
+   Further electronic-reference error paths remain useful test opportunities.
 2. Joint-loss and nonadiabatic state-tracking edge cases under
    spatial/electronic gauge transformations.
 3. Quantum Pauli bit-ordering and measurement ambiguity negative controls.
-4. The three preexisting omitted optional integration wrappers, ideally
-   measured under an integrated `.[all]` environment if practical.
+4. Broader dependency-version compatibility for the three optional wrappers;
+   the combined `.[all]` environment now measures their coverage directly.
 
 Coverage is only one quality signal. An internally consistent but
 scientifically incorrect molecular Hamiltonian can have 100% line coverage;

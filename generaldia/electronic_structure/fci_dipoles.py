@@ -122,10 +122,14 @@ class FCIDipoleBackend:
         except ImportError as error:
             raise ImportError("install GeneralDIA with the 'pyscf' extra") from error
         numbers = np.asarray(atomic_numbers)
-        positions = np.asarray(positions_angstrom, dtype=np.float64)
+        positions = np.asarray(positions_angstrom)
+        if positions.dtype.kind not in "iuf":
+            raise ValueError("positions_angstrom must contain real numbers")
+        positions = positions.astype(np.float64)
         if (
             numbers.ndim != 1
             or len(numbers) < 2
+            or numbers.dtype.kind not in "iuf"
             or not np.isfinite(numbers).all()
             or np.any(numbers < 1)
             or np.any(numbers != numbers.astype(int))
