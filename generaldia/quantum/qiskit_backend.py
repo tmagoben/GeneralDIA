@@ -109,8 +109,10 @@ def run_grouped_measurements(
     """Execute all QWC measurement circuits and return one count mapping per group.
 
     When ``backend`` is omitted, Qiskit's ``BasicSimulator`` is used and ``seed`` is
-    forwarded as ``seed_simulator``. For an explicitly supplied backend, backend-specific
-    options should be passed through ``run_options``; ``seed`` is not injected.
+    forwarded as ``seed_simulator``. Circuits are transpiled to that simulator's
+    supported gates, including on Qiskit 1.0 and when explicitly supplied.
+    Other supplied backends receive circuits unchanged and handle compilation;
+    its options belong in ``run_options`` and ``seed`` is not injected.
     """
 
     shots = _validate_shots(shots)
@@ -133,6 +135,10 @@ def run_grouped_measurements(
         backend = BasicSimulator()
         if seed is not None:
             options.setdefault("seed_simulator", int(seed))
+    if isinstance(backend, BasicSimulator):
+        from qiskit import transpile
+
+        circuits = tuple(transpile(list(circuits), backend=backend, optimization_level=0))
 
     result = backend.run(list(circuits), shots=shots, **options).result()
     return tuple(dict(result.get_counts(index)) for index in range(len(circuits)))

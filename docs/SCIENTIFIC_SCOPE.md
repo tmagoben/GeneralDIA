@@ -14,6 +14,12 @@ GeneralDIA supports method development for small finite electronic-state manifol
 - PySCF reference-data adapters;
 - exact Pauli expansion and small ground-state VQE comparisons.
 
+The dev7 H3+ experiment adds a local A1+E spectral fit and held-out Berry
+topology checks against physical FCI overlaps in two bases. Its symmetry
+prior fixes the intersection structure. It is a single-molecule local
+validation, with no A1--E mixing or additional-observable supervision;
+see [its explicit limits](DEV7_COMPATIBILITY_AND_LEARNING.md).
+
 ## Meaning of a learned matrix
 
 Suppose a model reproduces reference energies at each geometry. For any unitary

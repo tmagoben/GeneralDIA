@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+- v3.4.0.dev7 adds a local permutation-covariant A1+E H3+ Hamiltonian,
+  spectral fitting and held-out physical FCI topology checks in STO-3G and
+  6-31G across three seeds. An exactly isospectral, wrong-topology control
+  must be rejected. This is a restricted local model, not a completed
+  learned-diabatic or dynamics certification.
+- Test the declared scientific dependency floors together, add macOS core
+  CI and opt-in CUDA hardware parity checks. Fix Qiskit 1.0 BasicSimulator
+  execution by compiling its circuits to supported gates.
+
 - v3.4.0.dev6 tests real PySCF failure paths, RHF/SA-CASSCF finite-difference
   gradients and quantum backend contracts. Reject fractional atom labels,
   complex coordinates and invalid solver controls before silent coercion.

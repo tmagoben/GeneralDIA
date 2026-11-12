@@ -73,6 +73,12 @@ source universe is measured with all optional dependencies installed, with a
 core/PySCF figures above retain their original source scope and remain
 separate measurements. See [dev6 validation](DEV6_BACKEND_VALIDATION.md).
 
+Dev7 keeps these floors and adds a minimum-scientific-version job with the
+same full-source 92% gate, plus macOS core testing. Three CUDA tests skip on
+CPU hosts; an explicitly requested CUDA run fails if hardware is missing.
+The learned H3+ model has independent synthetic recovery/covariance tests
+and two-basis physical FCI holdouts. See [dev7 validation](DEV7_COMPATIBILITY_AND_LEARNING.md).
+
 The next scientific coverage iteration should focus on:
 
 1. The SCF/FCI nonconvergence, missing-root and nonfinite-closing-link
