@@ -108,16 +108,22 @@ State-specific energies are not stationary under state-average orbital
 rotations; an energy threshold of 1e-10 leaves the default orbital-gradient
 threshold at 1e-5. One hosted difference amplified the residual into an
 8.28e-5 Eh/bohr discrepancy. The analytic gradient under test still uses
-the wrapper defaults. An independent direct-PySCF displaced-energy reference
-now sets RHF energy/orbital tolerances to 1e-13/1e-10 and CASSCF
-energy/orbital/FCI tolerances to 1e-12/1e-8/1e-13, with at most 100 CASSCF
+the wrapper defaults. An independent direct-PySCF reference uses LiH's exact
+axial symmetry (`symmetry=True`) and verifies that its central state energies
+match the default wrapper within 1e-6 Eh, preventing a different symmetry
+manifold from silently replacing the target. It sets RHF energy/orbital
+tolerances to 1e-13/1e-10 and CASSCF energy/orbital/FCI tolerances to
+1e-12/1e-9/1e-13, with at most 100 CASSCF
 macro iterations and mandatory convergence. Two step sizes, 2e-3 and 1e-3 A,
 must both meet the unchanged 2e-5 Eh/bohr gradient tolerance, and their
 differences must agree within 2e-6 Eh/bohr.
 PySCF documents its [square-root orbital tolerance default](https://pyscf.org/pyscf_api_docs/pyscf.mcscf.html).
 A local displacement study from 1e-4 to 4e-3 A identified 1e-3--2e-3 A
-as a stable interval, balancing solver noise against truncation; its
-gradient errors were below 1e-6 Eh/bohr and step differences below 5e-7.
+as a suitable interval for balancing solver noise against truncation.
+Symmetry-unrestricted references still fluctuated between hosts. The
+symmetry-adapted reference converged at the stricter orbital threshold;
+locally its gradient errors were below 1e-6 Eh/bohr and adjacent-step
+differences below 5e-7, including an additional 5e-4-A check.
 No nonconverged solve is accepted;
 the change tightens the reference instead of relaxing acceptance.
 

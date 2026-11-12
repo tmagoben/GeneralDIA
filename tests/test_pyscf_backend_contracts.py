@@ -99,8 +99,10 @@ def test_real_wrapper_gradients_match_energy_finite_differences(serial_pyscf, me
     # Default sqrt(conv_tol)=1e-5 orbital residuals can amplify into O(1e-4)
     # finite-difference noise even when the average energy has converged.
     # Keep the default wrapper under test. The independent energy oracle
-    # explicitly converges both orbital and energy residuals; reducing only
-    # conv_tol still gave platform-dependent step noise in hosted PySCF.
+    # uses LiH's exact axial symmetry and converges orbital/energy residuals.
+    # Symmetry-unrestricted orbital rotations left individual root energies
+    # noisy despite a converged state average. Check the same central roots
+    # explicitly so symmetry cannot silently substitute a different manifold.
     def reference_energy(positions):
         from pyscf import gto, mcscf, scf
 
@@ -108,6 +110,7 @@ def test_real_wrapper_gradients_match_energy_finite_differences(serial_pyscf, me
             atom=[("Li", positions[0]), ("H", positions[1])],
             basis="sto-3g",
             unit="Angstrom",
+            symmetry=True,
             verbose=0,
         )
         mean_field = scf.RHF(molecule)
@@ -119,13 +122,16 @@ def test_real_wrapper_gradients_match_energy_finite_differences(serial_pyscf, me
             return np.array([mean_field.e_tot])
         reference = mcscf.CASSCF(mean_field, 2, (1, 1)).state_average([0.5, 0.5])
         reference.conv_tol = 1e-12
-        reference.conv_tol_grad = 1e-8
+        reference.conv_tol_grad = 1e-9
         reference.fcisolver.conv_tol = 1e-13
         reference.max_cycle_macro = 100
         reference.kernel()
         assert reference.converged
         return np.asarray(reference.e_states)
 
+    np.testing.assert_allclose(
+        reference_energy(geometry), center.energies_hartree, atol=1e-6, rtol=0
+    )
     derivatives = []
     # The step study resolves truncation and solver noise at 0.001--0.002 A.
     # Smaller displacements amplify tiny state-specific energy residuals.
