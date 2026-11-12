@@ -90,8 +90,10 @@ def test_invalid_ci_benchmark_settings_fail_before_pyscf_calculation(settings):
         certify_h3plus_molecular_ci(**settings)
 
 
-def test_molecular_ci_is_stable_at_second_bond_and_loop_radius():
+@pytest.mark.parametrize("basis", ["sto-3g", "6-31g"])
+def test_molecular_ci_is_stable_at_second_bond_and_loop_radius(basis):
     evidence = certify_h3plus_molecular_ci(
+        basis=basis,
         bond_angstrom=0.90,
         radius_angstrom=0.045,
         refinement_points=(8, 12, 16),
@@ -102,8 +104,9 @@ def test_molecular_ci_is_stable_at_second_bond_and_loop_radius():
     assert abs(abs(evidence.lower_excited_loop.phases[-1]) - math.pi) < 0.06
 
 
-def test_atom_relabeling_preserves_molecular_energies_and_holonomy():
-    backend = FCIDipoleBackend(charge=1, n_states=4, conv_tol=1e-11)
+@pytest.mark.parametrize("basis", ["sto-3g", "6-31g"])
+def test_atom_relabeling_preserves_molecular_energies_and_holonomy(basis):
+    backend = FCIDipoleBackend(basis=basis, charge=1, n_states=4, conv_tol=1e-11)
     geometry = h3plus_ci_loop(16, 0.06)
     ordinary = backend.calculate_loop([1, 1, 1], geometry, path_id="h3plus-ordered")
     permuted = backend.calculate_loop(

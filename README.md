@@ -283,6 +283,21 @@ This is reference validation for [the learned-Hamiltonian milestone](https://git
 which remains open; it does not establish complete-basis convergence or
 certify the learned model.
 
+## Backend validation and coverage (v3.4.0.dev6)
+
+The dev6 checkpoint exercises real RHF/FCI nonconvergence, missing FCI roots
+and nonfinite physical closing overlaps. RHF and SA-CASSCF gradients are
+checked against energy finite differences. PySCF input validation now rejects
+fractional atom labels, complex coordinates, invalid convergence tolerances
+and nonintegral solver controls before conversion can alter the calculation.
+
+The combined-backend job installs `.[all]` and measures **every `generaldia`
+module**, using `.coveragerc.all` with a 92% total floor and separate 90%
+floors for the PySCF, PennyLane and Qiskit wrappers. The original 87% core and
+92% PySCF-only gates keep their historical source scope. The wheel is also
+installed into a separate environment and exercised outside the checkout.
+See [the dev6 validation record](docs/DEV6_BACKEND_VALIDATION.md).
+
 ## Path-aware visual diagnostics
 
 The merged v3.2 milestone supplies invariant path supervision and family-level

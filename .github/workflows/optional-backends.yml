@@ -16,9 +16,44 @@ on:
       - "examples/**"
       - "tests/**"
       - "pyproject.toml"
+      - ".coveragerc.all"
+      - "scripts/**"
       - ".github/workflows/optional-backends.yml"
 
 jobs:
+  all-backends:
+    runs-on: ubuntu-latest
+    env:
+      OMP_NUM_THREADS: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - run: python -m pip install -e ".[all]"
+      - name: Test all backends with no source exclusions
+        run: pytest --cov --cov-config=.coveragerc.all --cov-report=term-missing --cov-report=xml:coverage-all.xml
+      - name: Require 90 percent coverage in each optional wrapper
+        run: |
+          coverage report --rcfile=.coveragerc.all --include="*/electronic_structure/pyscf_backend.py" --fail-under=90
+          coverage report --rcfile=.coveragerc.all --include="*/quantum/pennylane_backend.py" --fail-under=90
+          coverage report --rcfile=.coveragerc.all --include="*/quantum/qiskit_backend.py" --fail-under=90
+      - name: Archive full-source coverage
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-all-backends
+          path: coverage-all.xml
+          if-no-files-found: error
+      - name: Build and test the installed wheel outside the checkout
+        run: |
+          python -m build
+          python -m venv --system-site-packages "$RUNNER_TEMP/wheel-env"
+          "$RUNNER_TEMP/wheel-env/bin/python" -m pip install --no-deps --force-reinstall dist/*.whl
+          cd "$RUNNER_TEMP"
+          "$RUNNER_TEMP/wheel-env/bin/python" -I "$GITHUB_WORKSPACE/scripts/smoke_installed_package.py"
+
   quantum:
     runs-on: ubuntu-latest
     steps:

@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from math import isfinite
+from numbers import Integral, Real
 from typing import Any
 
 import numpy as np
@@ -44,12 +46,20 @@ def _require() -> tuple[Any, Any, Any, str]:
 
 
 def _atoms(atomic_numbers: ArrayLike, positions: ArrayLike) -> list[tuple[str, tuple[float, ...]]]:
-    atomic_numbers = np.asarray(atomic_numbers, dtype=np.int64)
-    positions = np.asarray(positions, dtype=np.float64)
+    atomic_numbers = np.asarray(atomic_numbers)
+    positions = np.asarray(positions)
     if atomic_numbers.ndim != 1 or atomic_numbers.size == 0:
         raise ValueError("atomic_numbers must have shape (N,) with N > 0")
     if positions.shape != (atomic_numbers.size, 3):
         raise ValueError("positions must have shape (N, 3)")
+    if (
+        atomic_numbers.dtype.kind not in "iuf"
+        or not np.isfinite(atomic_numbers).all()
+        or np.any(atomic_numbers != np.floor(atomic_numbers))
+    ):
+        raise ValueError("atomic_numbers must contain finite integers")
+    if positions.dtype.kind not in "iuf":
+        raise ValueError("positions must contain real numbers")
     if not np.isfinite(positions).all():
         raise ValueError("positions must contain finite values")
     if np.any(atomic_numbers < 1) or np.any(atomic_numbers >= len(_SYMBOLS)):
@@ -58,6 +68,28 @@ def _atoms(atomic_numbers: ArrayLike, positions: ArrayLike) -> list[tuple[str, t
         (_SYMBOLS[int(atomic_number)], tuple(map(float, position)))
         for atomic_number, position in zip(atomic_numbers, positions, strict=True)
     ]
+
+
+def _integer(value: Any, name: str, minimum: int | None = None) -> int:
+    if isinstance(value, (bool, np.bool_)) or not isinstance(value, Integral):
+        raise ValueError(f"{name} must be an integer")
+    if minimum is not None and value < minimum:
+        raise ValueError(f"{name} must be >= {minimum}")
+    return int(value)
+
+
+def _reference_settings(basis: str, charge: int, spin: int, conv_tol: float) -> None:
+    if not isinstance(basis, str) or not basis.strip():
+        raise ValueError("basis must be a non-empty string")
+    _integer(charge, "charge")
+    _integer(spin, "spin", 0)
+    if (
+        isinstance(conv_tol, bool)
+        or not isinstance(conv_tol, Real)
+        or not isfinite(conv_tol)
+        or conv_tol <= 0
+    ):
+        raise ValueError("conv_tol must be finite and positive")
 
 
 class RHFBackend:
@@ -70,10 +102,7 @@ class RHFBackend:
         spin: int = 0,
         conv_tol: float = 1e-10,
     ) -> None:
-        if not basis:
-            raise ValueError("basis cannot be empty")
-        if conv_tol <= 0:
-            raise ValueError("conv_tol must be positive")
+        _reference_settings(basis, charge, spin, conv_tol)
         self.basis = basis
         self.charge = int(charge)
         self.spin = int(spin)
@@ -138,13 +167,20 @@ class SACASSCFBackend:
         conv_tol: float = 1e-10,
         use_etfs: bool = False,
     ) -> None:
-        if int(ncas) < 1 or int(n_states) < 2:
-            raise ValueError("ncas must be positive and n_states must be at least two")
-        if conv_tol <= 0:
-            raise ValueError("conv_tol must be positive")
-        self.ncas = int(ncas)
-        self.nelecas = nelecas
-        self.n_states = int(n_states)
+        _reference_settings(basis, charge, spin, conv_tol)
+        self.ncas = _integer(ncas, "ncas", 1)
+        self.n_states = _integer(n_states, "n_states", 2)
+        if isinstance(nelecas, tuple) and len(nelecas) == 2:
+            counts = tuple(_integer(n, "nelecas", 0) for n in nelecas)
+            valid = sum(counts) > 0 and max(counts) <= self.ncas
+        else:
+            counts = _integer(nelecas, "nelecas", 1)
+            valid = counts <= 2 * self.ncas
+        if not valid:
+            raise ValueError("nelecas exceeds the active orbital capacity")
+        if not isinstance(use_etfs, (bool, np.bool_)):
+            raise ValueError("use_etfs must be a boolean")
+        self.nelecas = counts
         self.basis = basis
         self.charge = int(charge)
         self.spin = int(spin)
