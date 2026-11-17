@@ -51,6 +51,13 @@ The dev7 checkpoint also fits a restricted symmetry-aware H3+ Hamiltonian and
 checks its topology on held-out physical FCI paths in two orbital bases.
 See [the model, compatibility matrix and remaining limits](docs/DEV7_COMPATIBILITY_AND_LEARNING.md).
 
+Two separate dev8 entry points:
+
+- [Verify an existing H3+ conical-intersection report](services/evidence/README.md)
+  over HTTP or inspect its verdict with read-only MCP tools. Neither runs a simulation.
+- [Calculate and independently check a new H3+ optical observable](docs/DEV8_TRANSITION_STRENGTHS.md)
+  at four static geometries in each of two orbital bases. This is a reference benchmark, not a learned dipole.
+
 ## Processing chain
 
 ```mermaid

@@ -69,7 +69,10 @@ def close(value: object, expected: float, label: str) -> None:
 
 
 def distance(a: float, b: float) -> float:
-    return abs(math.atan2(math.sin(a - b), math.cos(a - b)))
+    delta = a - b
+    if not math.isfinite(delta):
+        delta = math.remainder(a, math.tau) - math.remainder(b, math.tau)
+    return abs(math.atan2(math.sin(delta), math.cos(delta)))
 
 
 def check_flags(value: object, expected: dict[str, bool], label: str) -> None:
@@ -81,34 +84,47 @@ def check_flags(value: object, expected: dict[str, bool], label: str) -> None:
         require(computed, f"{label}.{key}: failed required check")
 
 
-def check_loop(value: object, counts: list[int], label: str) -> tuple[float, float]:
+def check_loop(
+    value: object, counts: list[int], label: str, measurements: list[dict] | None = None
+) -> tuple[float, float]:
     loop = mapping(value, label)
     require(loop.get("point_counts") == counts, f"{label}.point_counts: mesh mismatch")
     phases = numbers(loop.get("phases"), len(counts), f"{label}.phases")
     errors = [distance(a, b) for a, b in pairwise(phases)]
+    coarse = max(distance(phase, phases[-1]) for phase in phases[:-1])
+    reference_error = distance(phases[-1], math.pi)
+    limit = THRESHOLDS["phase_tolerance_radians"]
+    deviations = (max(errors), coarse, reference_error)
+    if measurements is not None:
+        for name, error in zip(
+            ("adjacent_mesh", "coarse_to_finest", "distance_to_pi"), deviations, strict=True
+        ):
+            measurements.append(
+                {"check": f"{label}.{name}", "error": error, "limit": limit, "unit": "rad"}
+            )
     supplied = numbers(
         loop.get("successive_phase_errors"), len(errors), f"{label}.successive_phase_errors"
     )
     for actual, expected in zip(supplied, errors, strict=True):
         close(actual, expected, f"{label}.successive_phase_errors")
-    coarse = max(distance(phase, phases[-1]) for phase in phases[:-1])
-    reference_error = distance(phases[-1], math.pi)
     close(loop.get("coarse_to_finest_phase_error"), coarse, f"{label}.coarse_to_finest_phase_error")
     close(loop.get("reference_phase_error"), reference_error, f"{label}.reference_phase_error")
-    require(loop.get("phase_tolerance") == 0.06, f"{label}.phase_tolerance: changed threshold")
+    require(loop.get("phase_tolerance") == limit, f"{label}.phase_tolerance: changed threshold")
     close(loop.get("reference_phase"), math.pi, f"{label}.reference_phase")
     strength = number(
         loop.get("minimum_link_singular_value"), f"{label}.minimum_link_singular_value"
     )
     require(0.65 <= strength <= 1 + 1e-8, f"{label}: unresolved or invalid physical overlap link")
-    computed = max(errors) <= 0.06 and coarse <= 0.06 and reference_error <= 0.06
+    computed = max(deviations) <= limit
     require(type(loop.get("passed")) is bool, f"{label}.passed: expected a JSON boolean")
     require(loop["passed"] == computed, f"{label}.passed: inconsistent with phase evidence")
     require(computed, f"{label}: failed pi-phase or mesh-convergence check")
     return phases[-1], strength
 
 
-def check_result(value: object, basis: str, *, branching_required: bool) -> dict:
+def check_result(
+    value: object, basis: str, *, branching_required: bool, measurements: list[dict] | None = None
+) -> dict:
     result = mapping(value, basis)
     require(result.get("basis") == basis, f"{basis}: basis label mismatch")
     require(
@@ -137,10 +153,10 @@ def check_result(value: object, basis: str, *, branching_required: bool) -> dict
         close(ratios[0], gaps[1] / gaps[0], f"{basis}.branching_gap_ratios.x")
         close(ratios[1], gaps[3] / gaps[2], f"{basis}.branching_gap_ratios.y")
     lower, lower_strength = check_loop(
-        result.get("lower_excited_loop"), counts, f"{basis}.lower_excited_loop"
+        result.get("lower_excited_loop"), counts, f"{basis}.lower_excited_loop", measurements
     )
     _, upper_strength = check_loop(
-        result.get("upper_excited_loop"), counts, f"{basis}.upper_excited_loop"
+        result.get("upper_excited_loop"), counts, f"{basis}.upper_excited_loop", measurements
     )
     scalar_keys = (
         "min_ground_isolation_hartree",
@@ -189,7 +205,7 @@ def check_result(value: object, basis: str, *, branching_required: bool) -> dict
     return result
 
 
-def validate_report(value: object) -> None:
+def validate_report(value: object, *, measurements: list[dict] | None = None) -> None:
     """Raise InvalidReport for any malformed, inconsistent or failing report."""
     report = mapping(value, "report")
     for key in ("stage", "revision", "backend", "method"):
@@ -208,7 +224,9 @@ def validate_report(value: object) -> None:
     )
     kind = report.get("kind")
     if kind == SINGLE_KIND:
-        check_result(report.get("result"), "sto-3g", branching_required=False)
+        check_result(
+            report.get("result"), "sto-3g", branching_required=False, measurements=measurements
+        )
     elif kind == COMPARISON_KIND:
         require(
             type(report.get("schema_version")) is int and report["schema_version"] == 1,
@@ -232,12 +250,14 @@ def validate_report(value: object) -> None:
         results = mapping(report.get("results"), "results")
         require(set(results) == {"sto-3g", "6-31g"}, "results: require STO-3G and 6-31G")
         checked = {}
-        for basis, item in results.items():
-            item = mapping(item, basis)
+        for basis in ("sto-3g", "6-31g"):
+            item = mapping(results[basis], basis)
             require(
                 item.get("settings") == {**settings, "basis": basis}, f"{basis}.settings: mismatch"
             )
-            checked[basis] = check_result(item.get("result"), basis, branching_required=True)
+            checked[basis] = check_result(
+                item.get("result"), basis, branching_required=True, measurements=measurements
+            )
             for key in ("bond_angstrom", "radius_angstrom", "refinement_points"):
                 require(
                     checked[basis][key] == settings.get(key),
@@ -281,13 +301,15 @@ def _finite_tree(value: object) -> None:
         number(value, "JSON number")
 
 
-def load_report(path: Path) -> object:
+def parse_report(text: str) -> object:
     """Parse strict JSON, rejecting duplicate keys and all nonfinite numbers."""
-    value = json.loads(
-        path.read_text(encoding="utf-8"), object_pairs_hook=_object, parse_constant=_constant
-    )
+    value = json.loads(text, object_pairs_hook=_object, parse_constant=_constant)
     _finite_tree(value)
     return value
+
+
+def load_report(path: Path) -> object:
+    return parse_report(path.read_text(encoding="utf-8"))
 
 
 def main() -> int:

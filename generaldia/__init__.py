@@ -104,4 +104,4 @@ __all__ = [
     "write_state_tracking_report",
 ]
 
-__version__ = "3.4.0.dev7"
+__version__ = "3.4.0.dev8"
