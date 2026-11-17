@@ -1,0 +1,706 @@
+{
+  "charge": 1,
+  "comparison": "PySCF RHF/singlet FCI RDMs vs dense symmetric products in Lowdin AOs",
+  "gates": {
+    "center_doublet_gap_hartree": 1e-06,
+    "energy_abs_hartree": 1e-08,
+    "min_external_gap_hartree": 0.001,
+    "min_line_strength_e2_bohr2": 1e-05,
+    "oscillator_abs": 2e-06,
+    "tensor_abs_e2_bohr2": 2e-06
+  },
+  "kind": "h3plus-ground-to-excited-doublet-length-gauge",
+  "observable": "unweighted Cartesian line tensor and energy-weighted oscillator sum (a.u.)",
+  "pass": true,
+  "pyscf": "2.15.1",
+  "results": [
+    {
+      "backend": {
+        "backend": "PySCF",
+        "backend_version": "2.15.1",
+        "basis": "sto-3g",
+        "charge": 1,
+        "conv_tol": 1e-11,
+        "coordinate_unit": "angstrom",
+        "dipole_origin_bohr": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "dipole_translation_law": "mu(R+delta) = mu(R) + charge*delta_bohr*I",
+        "dipole_unit": "e*bohr",
+        "energy_unit": "hartree",
+        "method": "all-electron singlet FCI",
+        "n_states": 4,
+        "overlap_method": "FCI determinant overlaps using cross-AO integrals",
+        "spin": 0,
+        "state_matrix_convention": "row=bra,column=ket"
+      },
+      "basis": "sto-3g",
+      "center_tensor_symmetry_error_e2_bohr2": 6.661338147750939e-16,
+      "checks": {
+        "all_geometry_checks": true,
+        "center_doublet_degenerate": true,
+        "center_planar_isotropy": true,
+        "rotation_and_translation_oscillator_invariant": true,
+        "rotation_and_translation_tensor_covariance": true
+      },
+      "geometries": [
+        {
+          "checks": {
+            "band_isolated": true,
+            "bright_band": true,
+            "energy_matched_zero_dipoles_rejected": true,
+            "independent_line_tensor": true,
+            "independent_oscillator_sum": true,
+            "independent_singlet_energies": true
+          },
+          "energies_hartree": [
+            -1.2639168590365681,
+            -0.40510692119711056,
+            -0.4051069211971092,
+            0.31317798533098773
+          ],
+          "geometry": "center",
+          "line_strength_e2_bohr2": 2.6777369644329037,
+          "line_tensor_e2_bohr2": [
+            [
+              1.3388684822164514,
+              -3.035494015826706e-16,
+              0.0
+            ],
+            [
+              -3.035494015826706e-16,
+              1.3388684822164525,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "min_external_gap_hartree": 0.718284906528097,
+          "oracle_energy_error_hartree": 1.7763568394002505e-15,
+          "oracle_line_tensor_e2_bohr2": [
+            [
+              1.3388684822164507,
+              -2.7755575615628914e-16,
+              0.0
+            ],
+            [
+              -2.7755575615628914e-16,
+              1.3388684822164523,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "oracle_oscillator_error": 1.5543122344752192e-15,
+          "oracle_oscillator_sum": 1.533111410650026,
+          "oracle_tensor_max_error_e2_bohr2": 6.661338147750939e-16,
+          "oscillator_sum": 1.5331114106500277,
+          "positions_angstrom": [
+            [
+              -0.440625,
+              -0.25439496236167886,
+              0.0
+            ],
+            [
+              0.440625,
+              -0.25439496236167886,
+              0.0
+            ],
+            [
+              0.0,
+              0.5087899247233578,
+              0.0
+            ]
+          ],
+          "zero_dipole_tensor_error_e2_bohr2": 1.3388684822164523
+        },
+        {
+          "checks": {
+            "band_isolated": true,
+            "bright_band": true,
+            "energy_matched_zero_dipoles_rejected": true,
+            "independent_line_tensor": true,
+            "independent_oscillator_sum": true,
+            "independent_singlet_energies": true
+          },
+          "energies_hartree": [
+            -1.263463376790153,
+            -0.42583328785738095,
+            -0.38236047415295804,
+            0.2999340120496443
+          ],
+          "geometry": "x-distorted",
+          "line_strength_e2_bohr2": 2.6754810543473715,
+          "line_tensor_e2_bohr2": [
+            [
+              1.3669449503519222,
+              1.0558729892916619e-15,
+              0.0
+            ],
+            [
+              1.0558729892916619e-15,
+              1.3085361039954495,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "min_external_gap_hartree": 0.6822944862026024,
+          "oracle_energy_error_hartree": 3.1086244689504383e-15,
+          "oracle_line_tensor_e2_bohr2": [
+            [
+              1.3669449503519233,
+              -2.694517093854988e-16,
+              0.0
+            ],
+            [
+              -2.694517093854988e-16,
+              1.3085361039954535,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "oracle_oscillator_error": 2.220446049250313e-15,
+          "oracle_oscillator_sum": 1.5319661198436254,
+          "oracle_tensor_max_error_e2_bohr2": 3.9968028886505635e-15,
+          "oscillator_sum": 1.5319661198436276,
+          "positions_angstrom": [
+            [
+              -0.4549136901662352,
+              -0.24600710180535115,
+              0.0
+            ],
+            [
+              0.4549136901662352,
+              -0.24600710180535115,
+              0.0
+            ],
+            [
+              0.0,
+              0.49201420361070236,
+              0.0
+            ]
+          ],
+          "zero_dipole_tensor_error_e2_bohr2": 1.3669449503519233
+        },
+        {
+          "checks": {
+            "band_isolated": true,
+            "bright_band": true,
+            "energy_matched_zero_dipoles_rejected": true,
+            "independent_line_tensor": true,
+            "independent_oscillator_sum": true,
+            "independent_singlet_energies": true
+          },
+          "energies_hartree": [
+            -1.2634510589901118,
+            -0.42603918460503243,
+            -0.38212134746947823,
+            0.3028741761830147
+          ],
+          "geometry": "y-distorted",
+          "line_strength_e2_bohr2": 2.6756199023201646,
+          "line_tensor_e2_bohr2": [
+            [
+              1.3383434475302491,
+              -0.027946114775010595,
+              0.0
+            ],
+            [
+              -0.027946114775010595,
+              1.3372764547899154,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "min_external_gap_hartree": 0.6849955236524929,
+          "oracle_energy_error_hartree": 3.552713678800501e-15,
+          "oracle_line_tensor_e2_bohr2": [
+            [
+              1.3383434475302565,
+              -0.027946114775008746,
+              0.0
+            ],
+            [
+              -0.027946114775008746,
+              1.3372764547899116,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "oracle_oscillator_error": 2.4424906541753444e-15,
+          "oracle_oscillator_sum": 1.532082638777334,
+          "oracle_tensor_max_error_e2_bohr2": 7.327471962526033e-15,
+          "oscillator_sum": 1.5320826387773316,
+          "positions_angstrom": [
+            [
+              -0.4241258417723139,
+              -0.25399336646521564,
+              0.0
+            ],
+            [
+              0.4571241582276861,
+              -0.25399336646521564,
+              0.0
+            ],
+            [
+              -0.03299831645537221,
+              0.5079867329304313,
+              0.0
+            ]
+          ],
+          "zero_dipole_tensor_error_e2_bohr2": 1.3383434475302565
+        },
+        {
+          "checks": {
+            "band_isolated": true,
+            "bright_band": true,
+            "energy_matched_zero_dipoles_rejected": true,
+            "independent_line_tensor": true,
+            "independent_oscillator_sum": true,
+            "independent_singlet_energies": true
+          },
+          "energies_hartree": [
+            -1.2634633767901517,
+            -0.42583328785738495,
+            -0.38236047415295893,
+            0.29993401204964387
+          ],
+          "geometry": "x-rotated-translated",
+          "line_strength_e2_bohr2": 2.6754810543473715,
+          "line_tensor_e2_bohr2": [
+            [
+              4.1383263303952017e-32,
+              -1.992981320641684e-16,
+              -1.269998139462348e-16
+            ],
+            [
+              -1.992981320641684e-16,
+              1.3669449503519222,
+              5.130366751137532e-16
+            ],
+            [
+              -1.269998139462348e-16,
+              5.130366751137532e-16,
+              1.3085361039954495
+            ]
+          ],
+          "min_external_gap_hartree": 0.6822944862026028,
+          "oracle_energy_error_hartree": 3.552713678800501e-15,
+          "oracle_line_tensor_e2_bohr2": [
+            [
+              1.1554527702097317e-32,
+              -1.2566989673639408e-16,
+              1.1904183077577032e-18
+            ],
+            [
+              -1.2566989673639408e-16,
+              1.3669449503519242,
+              -1.438059828126171e-16
+            ],
+            [
+              1.1904183077577032e-18,
+              -1.438059828126171e-16,
+              1.3085361039954535
+            ]
+          ],
+          "oracle_oscillator_error": 3.1086244689504383e-15,
+          "oracle_oscillator_sum": 1.531966119843624,
+          "oracle_tensor_max_error_e2_bohr2": 3.9968028886505635e-15,
+          "oscillator_sum": 1.531966119843621,
+          "positions_angstrom": [
+            [
+              0.2,
+              -0.5849136901662352,
+              -0.08600710180535115
+            ],
+            [
+              0.2,
+              0.32491369016623517,
+              -0.08600710180535115
+            ],
+            [
+              0.2,
+              -0.13,
+              0.6520142036107024
+            ]
+          ],
+          "zero_dipole_tensor_error_e2_bohr2": 1.3669449503519242
+        }
+      ],
+      "geometry_sha256": "5ef073547647e9c87863a8d315b6adc2c22a35db52c0d6885807bee2bbe38d9a",
+      "pass": true,
+      "rigid_oscillator_error": 6.661338147750939e-15,
+      "rigid_tensor_error_e2_bohr2": 5.428363141779087e-16
+    },
+    {
+      "backend": {
+        "backend": "PySCF",
+        "backend_version": "2.15.1",
+        "basis": "6-31g",
+        "charge": 1,
+        "conv_tol": 1e-11,
+        "coordinate_unit": "angstrom",
+        "dipole_origin_bohr": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "dipole_translation_law": "mu(R+delta) = mu(R) + charge*delta_bohr*I",
+        "dipole_unit": "e*bohr",
+        "energy_unit": "hartree",
+        "method": "all-electron singlet FCI",
+        "n_states": 4,
+        "overlap_method": "FCI determinant overlaps using cross-AO integrals",
+        "spin": 0,
+        "state_matrix_convention": "row=bra,column=ket"
+      },
+      "basis": "6-31g",
+      "center_tensor_symmetry_error_e2_bohr2": 1.7763568394002505e-15,
+      "checks": {
+        "all_geometry_checks": true,
+        "center_doublet_degenerate": true,
+        "center_planar_isotropy": true,
+        "rotation_and_translation_oscillator_invariant": true,
+        "rotation_and_translation_tensor_covariance": true
+      },
+      "geometries": [
+        {
+          "checks": {
+            "band_isolated": true,
+            "bright_band": true,
+            "energy_matched_zero_dipoles_rejected": true,
+            "independent_line_tensor": true,
+            "independent_oscillator_sum": true,
+            "independent_singlet_energies": true
+          },
+          "energies_hartree": [
+            -1.3035715396307141,
+            -0.5777177665617415,
+            -0.5777177665617392,
+            -0.11442837298167285
+          ],
+          "geometry": "center",
+          "line_strength_e2_bohr2": 2.7554578037674524,
+          "line_tensor_e2_bohr2": [
+            [
+              1.377728901883728,
+              1.084117086520456e-15,
+              0.0
+            ],
+            [
+              1.084117086520456e-15,
+              1.3777289018837244,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "min_external_gap_hartree": 0.4632893935800664,
+          "oracle_energy_error_hartree": 2.6645352591003757e-15,
+          "oracle_line_tensor_e2_bohr2": [
+            [
+              1.3777289018837315,
+              1.3322676295501878e-15,
+              0.0
+            ],
+            [
+              1.3322676295501878e-15,
+              1.377728901883733,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "oracle_oscillator_error": 1.3100631690576847e-14,
+          "oracle_oscillator_sum": 1.3333729622646484,
+          "oracle_tensor_max_error_e2_bohr2": 8.659739592076221e-15,
+          "oscillator_sum": 1.3333729622646353,
+          "positions_angstrom": [
+            [
+              -0.440625,
+              -0.25439496236167886,
+              0.0
+            ],
+            [
+              0.440625,
+              -0.25439496236167886,
+              0.0
+            ],
+            [
+              0.0,
+              0.5087899247233578,
+              0.0
+            ]
+          ],
+          "zero_dipole_tensor_error_e2_bohr2": 1.377728901883733
+        },
+        {
+          "checks": {
+            "band_isolated": true,
+            "bright_band": true,
+            "energy_matched_zero_dipoles_rejected": true,
+            "independent_line_tensor": true,
+            "independent_oscillator_sum": true,
+            "independent_singlet_energies": true
+          },
+          "energies_hartree": [
+            -1.3031995444378257,
+            -0.5864332530006617,
+            -0.5682229783017649,
+            -0.11407172675594812
+          ],
+          "geometry": "x-distorted",
+          "line_strength_e2_bohr2": 2.753515976757681,
+          "line_tensor_e2_bohr2": [
+            [
+              1.4058799853942399,
+              -9.98288739288291e-16,
+              0.0
+            ],
+            [
+              -9.98288739288291e-16,
+              1.347635991363441,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "min_external_gap_hartree": 0.4541512515458168,
+          "oracle_energy_error_hartree": 3.1086244689504383e-15,
+          "oracle_line_tensor_e2_bohr2": [
+            [
+              1.4058799853942365,
+              -1.295882122015137e-16,
+              0.0
+            ],
+            [
+              -1.295882122015137e-16,
+              1.3476359913634357,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "oracle_oscillator_error": 7.327471962526033e-15,
+          "oracle_oscillator_sum": 1.3321121711136135,
+          "oracle_tensor_max_error_e2_bohr2": 5.329070518200751e-15,
+          "oscillator_sum": 1.3321121711136208,
+          "positions_angstrom": [
+            [
+              -0.4549136901662352,
+              -0.24600710180535115,
+              0.0
+            ],
+            [
+              0.4549136901662352,
+              -0.24600710180535115,
+              0.0
+            ],
+            [
+              0.0,
+              0.49201420361070236,
+              0.0
+            ]
+          ],
+          "zero_dipole_tensor_error_e2_bohr2": 1.4058799853942365
+        },
+        {
+          "checks": {
+            "band_isolated": true,
+            "bright_band": true,
+            "energy_matched_zero_dipoles_rejected": true,
+            "independent_line_tensor": true,
+            "independent_oscillator_sum": true,
+            "independent_singlet_energies": true
+          },
+          "energies_hartree": [
+            -1.3031889910208005,
+            -0.5865465038713924,
+            -0.5681072159733787,
+            -0.11405956027580078
+          ],
+          "geometry": "y-distorted",
+          "line_strength_e2_bohr2": 2.753523382357534,
+          "line_tensor_e2_bohr2": [
+            [
+              1.3781081081451663,
+              -0.028584368744638208,
+              0.0
+            ],
+            [
+              -0.028584368744638208,
+              1.3754152742123678,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "min_external_gap_hartree": 0.4540476556975779,
+          "oracle_energy_error_hartree": 4.440892098500626e-15,
+          "oracle_line_tensor_e2_bohr2": [
+            [
+              1.3781081081451547,
+              -0.02858436874464021,
+              0.0
+            ],
+            [
+              -0.02858436874464021,
+              1.3754152742123762,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "oracle_oscillator_error": 8.43769498715119e-15,
+          "oracle_oscillator_sum": 1.3321006205559274,
+          "oracle_tensor_max_error_e2_bohr2": 1.1546319456101628e-14,
+          "oscillator_sum": 1.3321006205559358,
+          "positions_angstrom": [
+            [
+              -0.4241258417723139,
+              -0.25399336646521564,
+              0.0
+            ],
+            [
+              0.4571241582276861,
+              -0.25399336646521564,
+              0.0
+            ],
+            [
+              -0.03299831645537221,
+              0.5079867329304313,
+              0.0
+            ]
+          ],
+          "zero_dipole_tensor_error_e2_bohr2": 1.3781081081451547
+        },
+        {
+          "checks": {
+            "band_isolated": true,
+            "bright_band": true,
+            "energy_matched_zero_dipoles_rejected": true,
+            "independent_line_tensor": true,
+            "independent_oscillator_sum": true,
+            "independent_singlet_energies": true
+          },
+          "energies_hartree": [
+            -1.3031995444378262,
+            -0.5864332530006608,
+            -0.5682229783017632,
+            -0.11407172675594834
+          ],
+          "geometry": "x-rotated-translated",
+          "line_strength_e2_bohr2": 2.7535159767576793,
+          "line_tensor_e2_bohr2": [
+            [
+              2.942824652361893e-31,
+              4.855050911318673e-16,
+              4.1308093415452815e-16
+            ],
+            [
+              4.855050911318673e-16,
+              1.4058799853942399,
+              -8.995288201831148e-16
+            ],
+            [
+              4.1308093415452815e-16,
+              -8.995288201831148e-16,
+              1.3476359913634395
+            ]
+          ],
+          "min_external_gap_hartree": 0.4541512515458148,
+          "oracle_energy_error_hartree": 2.6645352591003757e-15,
+          "oracle_line_tensor_e2_bohr2": [
+            [
+              1.6535634308968048e-31,
+              4.2006416248316226e-16,
+              2.3172514171204486e-16
+            ],
+            [
+              4.2006416248316226e-16,
+              1.4058799853942356,
+              -3.508373087998291e-17
+            ],
+            [
+              2.3172514171204486e-16,
+              -3.508373087998291e-17,
+              1.347635991363438
+            ]
+          ],
+          "oracle_oscillator_error": 3.3306690738754696e-15,
+          "oracle_oscillator_sum": 1.33211217111362,
+          "oracle_tensor_max_error_e2_bohr2": 4.218847493575595e-15,
+          "oscillator_sum": 1.3321121711136232,
+          "positions_angstrom": [
+            [
+              0.2,
+              -0.5849136901662352,
+              -0.08600710180535115
+            ],
+            [
+              0.2,
+              0.32491369016623517,
+              -0.08600710180535115
+            ],
+            [
+              0.2,
+              -0.13,
+              0.6520142036107024
+            ]
+          ],
+          "zero_dipole_tensor_error_e2_bohr2": 1.4058799853942356
+        }
+      ],
+      "geometry_sha256": "5ef073547647e9c87863a8d315b6adc2c22a35db52c0d6885807bee2bbe38d9a",
+      "pass": true,
+      "rigid_oscillator_error": 2.4424906541753444e-15,
+      "rigid_tensor_error_e2_bohr2": 1.5543122344752192e-15
+    }
+  ],
+  "same_geometries": true,
+  "schema_version": 1,
+  "scope": "four static geometries; no learned dipole, statewise gauge or nuclear dynamics",
+  "spin": 0
+}

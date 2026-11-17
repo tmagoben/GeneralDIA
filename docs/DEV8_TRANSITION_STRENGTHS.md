@@ -55,3 +55,24 @@ center's in-plane isotropy, covariance, and rejection of the zero-dipole control
 These are finite-basis, fixed-geometry electronic calculations. They are not a
 basis-set convergence study, absorption spectrum, learned transition operator,
 or molecular trajectory. See the [preceding learned-topology checkpoint](DEV7_COMPATIBILITY_AND_LEARNING.md).
+
+## Measured reference
+
+[Numerical report](../tests/goldens/h3plus_transition_band_reference.json) from
+[run 44155492759](https://github.com/tmagoben/GeneralDIA/actions/runs/44155492759),
+PySCF 2.15.1, matched all gates at all eight basis/geometry combinations.
+The last column is the largest absolute difference in the dimensionless oscillator
+sum between the two calculation routes over the four geometries in that basis.
+
+| Orbital basis | Equilateral line strength ($e^2a_0^2$) | Equilateral oscillator sum | Max absolute difference |
+| --- | ---: | ---: | ---: |
+| STO-3G | 2.677737 | 1.533111 | 3.11e−15 |
+| 6-31G | 2.755458 | 1.333373 | 1.31e−14 |
+
+The zero-dipole control kept the energies but missed at least one Cartesian
+tensor component by more than 1.33 $e^2a_0^2$ at every sampled geometry. The
+difference **between bases** is much larger than the numerical agreement
+**within a basis**; the latter is not evidence of physical convergence.
+
+Reference JSON SHA-256:
+`29356e4cb06bf2d326603d3c6b1d229f6f4e313d8b302f8c6f2291c207852b85`.

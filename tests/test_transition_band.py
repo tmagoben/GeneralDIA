@@ -1,5 +1,8 @@
 """Analytic optical controls, independent singlet oracle and live two-basis H3+ checks."""
 
+import json
+from pathlib import Path
+
 import numpy as np
 import pytest
 
@@ -78,6 +81,23 @@ def test_oracle_rejects_singular_and_malformed_integrals():
         bad[index] = replacement
         with pytest.raises(ValueError):
             singlet_spectrum(*bad)
+
+
+def test_archived_optical_controls_recompute_without_pyscf():
+    fixture = Path(__file__).parent / "goldens/h3plus_transition_band_reference.json"
+    evidence = json.loads(fixture.read_text(encoding="utf-8"))
+    first, second = evidence["results"]
+    assert first["geometry_sha256"] == second["geometry_sha256"]
+    assert [first["basis"], second["basis"]] == ["sto-3g", "6-31g"]
+    for item in (first, second):
+        assert len(item["geometries"]) == 4
+        for row in item["geometries"]:
+            tensor = np.array(row["line_tensor_e2_bohr2"])
+            oracle = np.array(row["oracle_line_tensor_e2_bohr2"])
+            np.testing.assert_allclose(tensor.trace(), row["line_strength_e2_bohr2"], atol=1e-12)
+            assert np.max(np.abs(tensor - oracle)) < 2e-6
+            assert abs(row["oscillator_sum"] - row["oracle_oscillator_sum"]) < 2e-6
+            assert np.max(np.abs(oracle)) > 2e-6  # reject same energies and zero dipoles
 
 
 @pytest.mark.optional

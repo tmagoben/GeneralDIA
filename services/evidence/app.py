@@ -59,7 +59,9 @@ def create_app(db_path: Path | None = None) -> FastAPI:
         "/v1/evaluations",
         response_model=Evaluation,
         status_code=201,
-        responses={200: {"model": Evaluation, "description": "Identical evaluation already stored"}},
+        responses={
+            200: {"model": Evaluation, "description": "Identical evaluation already stored"}
+        },
         openapi_extra={"requestBody": {"required": True, "content": {"application/json": body}}},
     )
     async def submit(request: Request, response: Response):
