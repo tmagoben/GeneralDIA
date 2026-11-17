@@ -11,3 +11,4 @@ build/
 dist/
 outputs/
 checkpoints/
+generaldia-evaluations.sqlite3

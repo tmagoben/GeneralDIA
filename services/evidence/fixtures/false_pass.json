@@ -1,0 +1,110 @@
+{
+  "backend": "PySCF 2.15.0",
+  "energies_and_gaps_units": "hartree",
+  "geometry_units": "angstrom",
+  "kind": "molecular-h3plus-excited-singlet-ci-certification",
+  "limits": "DEMONSTRATION ONLY: deliberately altered enclosing phase; original FCI energies retained. Not a physical reference.",
+  "method": "charged singlet full CI, STO-3G; four lowest singlet roots",
+  "pass": true,
+  "phase_convention": "minus argument of the cyclic physical overlap product",
+  "reference_papers": [
+    "https://doi.org/10.1039/D4CP00391H",
+    "https://doi.org/10.1063/1.2193516"
+  ],
+  "result": {
+    "basis": "sto-3g",
+    "bond_angstrom": 0.875,
+    "branching_gap_ratios": [
+      1.985799366866185,
+      2.003037410451105
+    ],
+    "center_energies_hartree": [
+      -1.2624865647366206,
+      -0.39677180572015214,
+      -0.39677180572014903,
+      0.32643472284282615
+    ],
+    "central_excited_gap_hartree": 3.1086244689504383e-15,
+    "charge": 1,
+    "checks": {
+      "energy_only_control_rejected": true,
+      "equilateral_excited_degeneracy": true,
+      "ground_and_higher_root_isolation": true,
+      "local_complex_gauge_covariance": true,
+      "lower_excited_pi_and_mesh": true,
+      "physical_nonencircling_zero": true,
+      "positive_excited_gap_on_loops": true,
+      "reversal_covariance": true,
+      "two_independent_linear_branching_directions": true,
+      "upper_excited_pi_and_mesh": true
+    },
+    "gauge_phase_error_radians": 0,
+    "geometry_sha256": {
+      "encircling_16": "9569e2726ef8c1ae71d1b8d8f7913e70f3a5e010cfd55ad0b07b880bde03b310",
+      "encircling_32": "138fa9a693d3898056b0193eb11d07e0879683b0cded26361054af4c01dfd7ce",
+      "encircling_8": "e96cc9dc5ae27d34862383dda33298469b85a3aaa3da6512f8de52e6eb11e7a2",
+      "nonenclosing": "4c482f7474563cf2dd94fae065953261c6b6d3d86085c8be76a589140e009ea0",
+      "reversed": "0bffb279d373ca8930a92b462259de9ff70da674ab1374d03f2293cd59f2373e",
+      "symmetry_and_branching": "f8a89d28e4d95c961326621fd1cc3091eca3545fc73755e98080886d86825594"
+    },
+    "isospectral_energy_only_phase_radians": 0,
+    "lower_excited_loop": {
+      "coarse_to_finest_phase_error": 0,
+      "minimum_link_singular_value": 0.9132479399641414,
+      "passed": true,
+      "phase_tolerance": 0.06,
+      "phases": [
+        3.021592653589793,
+        3.021592653589793,
+        3.021592653589793
+      ],
+      "point_counts": [
+        8,
+        16,
+        32
+      ],
+      "reference_phase": 3.141592653589793,
+      "reference_phase_error": 0.1200000000000001,
+      "successive_phase_errors": [
+        0,
+        0
+      ]
+    },
+    "min_excited_gap_on_loop_hartree": 0.07501799739415915,
+    "min_ground_isolation_hartree": 0.8286292770365611,
+    "min_upper_isolation_hartree": 0.6541645112612811,
+    "minimum_link_strength": 0.9132479399641414,
+    "nonenclosing_phase_radians": 0,
+    "radius_angstrom": 0.06,
+    "refinement_points": [
+      8,
+      16,
+      32
+    ],
+    "reverse_orientation_phase_radians": -3.141592653589793,
+    "upper_excited_loop": {
+      "coarse_to_finest_phase_error": 0,
+      "minimum_link_singular_value": 0.9142906383624256,
+      "passed": true,
+      "phase_tolerance": 0.06,
+      "phases": [
+        -3.141592653589793,
+        -3.141592653589793,
+        -3.141592653589793
+      ],
+      "point_counts": [
+        8,
+        16,
+        32
+      ],
+      "reference_phase": 3.141592653589793,
+      "reference_phase_error": 2.4492935982947064e-16,
+      "successive_phase_errors": [
+        0,
+        0
+      ]
+    }
+  },
+  "revision": "4e4e6ffb76e2dafceb3d7983281c9565560f763e",
+  "stage": "v3.4.0.dev3"
+}
